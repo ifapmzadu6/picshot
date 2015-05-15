@@ -79,6 +79,7 @@ class ViewController: UIViewController, HomeSceneDelegate, UIDocumentInteraction
     
     func loadLastPhoto() {
         let option = PHFetchOptions()
+        option.predicate = NSPredicate(format: "mediaType == %d", PHAssetMediaType.Image.rawValue)
         option.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
         let result = PHAsset.fetchAssetsWithOptions(option)
         if let asset = result.firstObject as? PHAsset {
@@ -188,6 +189,8 @@ class ViewController: UIViewController, HomeSceneDelegate, UIDocumentInteraction
     
     func imagePickerControllerDidCancel(picker: UIImagePickerController) {
         Analytics.sendEvent(category: "album", action: "cancel")
+        
+        picker.dismissViewControllerAnimated(true, completion: nil)
     }
     
     func imagePickerController(picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [NSObject : AnyObject]) {
@@ -198,7 +201,9 @@ class ViewController: UIViewController, HomeSceneDelegate, UIDocumentInteraction
         }
         let assetURL = info[UIImagePickerControllerReferenceURL] as? NSURL
         if let assetURL = assetURL {
-            let result = PHAsset.fetchAssetsWithALAssetURLs([assetURL], options: nil)
+            let fetchOptions = PHFetchOptions()
+            fetchOptions.predicate = NSPredicate(format: "mediaType == %d", PHAssetMediaType.Image.rawValue)
+            let result = PHAsset.fetchAssetsWithALAssetURLs([assetURL], options: fetchOptions)
             if let asset = result.firstObject as? PHAsset {
                 let options = PHImageRequestOptions()
                 options.networkAccessAllowed = true
@@ -285,7 +290,6 @@ class ViewController: UIViewController, HomeSceneDelegate, UIDocumentInteraction
     }
     
     func documentInteractionControllerDidDismissOpenInMenu(controller: UIDocumentInteractionController) {
-        
         let delay: Double
         if isDocumentControllerSelected == true {
             delay = 3
@@ -311,7 +315,10 @@ class ViewController: UIViewController, HomeSceneDelegate, UIDocumentInteraction
             if let scene = self.homeSceneView?.scene as? HomeScene {
                 scene.reset()
             }
-            self.doYouLikePicshot()
+            
+            if delay != 0 {
+                self.doYouLikePicshot()
+            }
         }
     }
     
