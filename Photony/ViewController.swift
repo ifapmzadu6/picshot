@@ -87,11 +87,15 @@ class ViewController: UIViewController, HomeSceneDelegate, UIDocumentInteraction
             options.networkAccessAllowed = true
             options.deliveryMode = .HighQualityFormat
             PHImageManager.defaultManager().requestImageForAsset(asset, targetSize: CGSizeMake(200, 200), contentMode: .AspectFill, options: options) { (image, info) -> Void in
-                if let scene = self.homeSceneView?.scene as? HomeScene {
-                    if let squaredImage = image.squaredImage() {
-                        scene.setImage(squaredImage)
+                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), { () -> Void in
+                    if let scene = self.homeSceneView?.scene as? HomeScene {
+                        if let squaredImage = image.squaredImage() {
+                            dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                                scene.setImage(squaredImage)
+                            })
+                        }
                     }
-                }
+                })
             }
             
             options.resizeMode = .None

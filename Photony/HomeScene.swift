@@ -23,6 +23,7 @@ class HomeScene: SKScene {
     
     var titleNode: SKLabelNode?
     var imageNode: SKShapeNode?
+    var splashNode: SKShapeNode?
     var arrowNode: SKShapeNode?
     var pointerNode: SKShapeNode?
     var pullToLabelNode: SKLabelNode?
@@ -142,6 +143,19 @@ class HomeScene: SKScene {
             node.runAction(SKAction.scaleTo(0, duration: 0))
         }
         
+        splashNode = SKShapeNode(circleOfRadius: radius)
+        if let node = splashNode {
+            node.fillColor = UIColor.clearColor()
+            node.strokeColor = UIColor(white: 0.92, alpha: 1)
+            node.lineWidth = 3
+            node.position = center
+            node.zPosition = 0
+            node.alpha = 0
+            addChild(node)
+            
+            node.runAction(SKAction.scaleTo(0, duration: 0))
+        }
+        
         let narrowPath = UIBezierPath.bezierPathWithArrowFromPoint(CGPointMake(0, 50), endPoint: CGPointZero, tailWidth: 15, headWidth: 30, headLength: 15)
         pointerNode = SKShapeNode(path: narrowPath.CGPath, centered: true)
         if let node = pointerNode {
@@ -204,6 +218,8 @@ class HomeScene: SKScene {
                     
                     titleNode?.runAction(SKAction.fadeAlphaTo(0, duration: 0.2))
                     pointerNode?.runAction(SKAction.fadeAlphaTo(0.2, duration: 0.2))
+                    splashNode?.removeAllActions()
+                    splashNode?.runAction(SKAction.fadeAlphaTo(0, duration: 0.2))
                 }
                 
                 if nodeAtPoint(position) == albumImageNode {
@@ -303,6 +319,9 @@ class HomeScene: SKScene {
                     pointerNode?.runAction(SKAction.fadeAlphaTo(0, duration: 0.1))
                     pullToLabelNode?.runAction(SKAction.fadeAlphaTo(1, duration: 0.1))
                     releaseToLabelNode?.runAction(SKAction.fadeAlphaTo(0, duration: 0.1))
+                    let expand = SKAction.group([SKAction.scaleTo(2, duration: 2), SKAction.fadeAlphaTo(0, duration: 2)])
+                    let reset = SKAction.group([SKAction.scaleTo(0.5, duration: 0), SKAction.fadeAlphaTo(1, duration: 0)])
+                    splashNode?.runAction(SKAction.repeatActionForever(SKAction.sequence([expand, reset, SKAction.waitForDuration(2)])))
                 }
                 else {
                     var theta = atan((position.y - draggingPosition.y)/(position.x - draggingPosition.x))
@@ -367,6 +386,9 @@ class HomeScene: SKScene {
                         pointerNode?.runAction(SKAction.fadeAlphaTo(0, duration: 0.1))
                         pullToLabelNode?.runAction(SKAction.fadeAlphaTo(1, duration: 0.1))
                         releaseToLabelNode?.runAction(SKAction.fadeAlphaTo(0, duration: 0.1))
+                        let expand = SKAction.group([SKAction.scaleTo(2, duration: 2), SKAction.fadeAlphaTo(0, duration: 2)])
+                        let reset = SKAction.group([SKAction.scaleTo(0.5, duration: 0), SKAction.fadeAlphaTo(1, duration: 0)])
+                        splashNode?.runAction(SKAction.repeatActionForever(SKAction.sequence([expand, reset, SKAction.waitForDuration(2)])))
                     }
                 }
                 
@@ -382,6 +404,10 @@ class HomeScene: SKScene {
         arrowNode?.runAction(SKAction.fadeAlphaTo(1, duration: 1, delay: 2, usingSpringWithDamping: 1, initialSpringVelocity: 0))
         pullToLabelNode?.runAction(SKAction.fadeAlphaTo(1, duration: 1, delay: 2, usingSpringWithDamping: 1, initialSpringVelocity: 0))
         albumImageNode?.runAction(SKAction.fadeAlphaTo(0.2, duration: 1, delay: 2, usingSpringWithDamping: 1, initialSpringVelocity: 0))
+        
+        let expand = SKAction.group([SKAction.scaleTo(2, duration: 2), SKAction.fadeAlphaTo(0, duration: 2)])
+        let reset = SKAction.group([SKAction.scaleTo(0.5, duration: 0), SKAction.fadeAlphaTo(1, duration: 0)])
+        splashNode?.runAction(SKAction.repeatActionForever(SKAction.sequence([expand, reset, SKAction.waitForDuration(2)])))
     }
     
     func resetImage() {
@@ -389,6 +415,8 @@ class HomeScene: SKScene {
         arrowNode?.alpha = 0
         pullToLabelNode?.alpha = 0
         albumImageNode?.alpha = 0
+        splashNode?.removeAllActions()
+        splashNode?.alpha = 0
     }
     
     func reset() {
@@ -411,6 +439,9 @@ class HomeScene: SKScene {
         instagramNode?.runAction(SKAction.scaleTo(1, duration: 0.6), completion: {
             self.instagramIconNode?.runAction(SKAction.fadeAlphaTo(1, duration: 0.05))
         })
+        let expand = SKAction.group([SKAction.scaleTo(2, duration: 2), SKAction.fadeAlphaTo(0, duration: 2)])
+        let reset = SKAction.group([SKAction.scaleTo(0.5, duration: 0), SKAction.fadeAlphaTo(1, duration: 0)])
+        splashNode?.runAction(SKAction.repeatActionForever(SKAction.sequence([expand, reset, SKAction.waitForDuration(2)])))
     }
     
     
