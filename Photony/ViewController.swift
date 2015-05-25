@@ -12,12 +12,14 @@ import Social
 import Photos
 
 
-class ViewController: UIViewController, HomeSceneDelegate, UIDocumentInteractionControllerDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+class ViewController: UIViewController, HomeSceneDelegate, UIDocumentInteractionControllerDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, PHPhotoLibraryChangeObserver {
     
     var homeSceneView: SKView?
     
     var assetURL: String?
     var originalImage: UIImage?
+    
+    var fetchResult: PHFetchResult?
     
     var instagramLabel: UILabel?
     var documentController: UIDocumentInteractionController?
@@ -40,40 +42,43 @@ class ViewController: UIViewController, HomeSceneDelegate, UIDocumentInteraction
         
         showHomeScene()
         
-        switch PHPhotoLibrary.authorizationStatus() {
-        case .NotDetermined:
-            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(2 * Double(NSEC_PER_SEC))), dispatch_get_main_queue()) {
-                PHPhotoLibrary.requestAuthorization { (status) -> Void in
-                    switch status {
-                    case .Authorized:
-                        dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                            self.loadLastPhoto()
-                        })
-                    case .NotDetermined:
-                        break
-                    case .Denied:
-                        fallthrough
-                    case .Restricted:
-                        dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                            let alertController = UIAlertController(title: "Allow picshot Access to your Photos", message: "Just Go to Settings > Privacy > Photos and Switch picshot to ON.", preferredStyle: .Alert)
-                            alertController.addAction(UIAlertAction(title: "OK", style: .Default, handler: nil))
-                            alertController.popoverPresentationController?.sourceView = self.view
-                            self.presentViewController(alertController, animated: true, completion: nil)
-                        })
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(2.3 * Double(NSEC_PER_SEC))), dispatch_get_main_queue()) {
+            switch PHPhotoLibrary.authorizationStatus() {
+            case .NotDetermined:
+                dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                    PHPhotoLibrary.requestAuthorization { (status) -> Void in
+                        switch status {
+                        case .Authorized:
+                            dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                                self.loadLastPhoto()
+                            })
+                        case .NotDetermined:
+                            break
+                        case .Denied:
+                            fallthrough
+                        case .Restricted:
+                            dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                                let alertController = UIAlertController(title: "Allow picshot Access to your Photos", message: "Just Go to Settings > Privacy > Photos and Switch picshot to ON.", preferredStyle: .Alert)
+                                alertController.addAction(UIAlertAction(title: "OK", style: .Default, handler: nil))
+                                alertController.popoverPresentationController?.sourceView = self.view
+                                self.presentViewController(alertController, animated: true, completion: nil)
+                            })
+                        }
                     }
-                }
+                })
+            case .Denied:
+                fallthrough
+            case .Restricted:
+                dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                    let alertController = UIAlertController(title: "Allow picshot Access to your Photos", message: "Just Go to Settings > Privacy > Photos and Switch picshot to ON.", preferredStyle: .Alert)
+                    alertController.addAction(UIAlertAction(title: "OK", style: .Default, handler: nil))
+                    alertController.popoverPresentationController?.sourceView = self.view
+                    self.presentViewController(alertController, animated: true, completion: nil)
+                })
+            case .Authorized:
+                self.loadLastPhoto()
+                PHPhotoLibrary.sharedPhotoLibrary().registerChangeObserver(self)
             }
-        case .Denied:
-            fallthrough
-        case .Restricted:
-            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(2 * Double(NSEC_PER_SEC))), dispatch_get_main_queue()) {
-                let alertController = UIAlertController(title: "Allow picshot Access to your Photos", message: "Just Go to Settings > Privacy > Photos and Switch picshot to ON.", preferredStyle: .Alert)
-                alertController.addAction(UIAlertAction(title: "OK", style: .Default, handler: nil))
-                alertController.popoverPresentationController?.sourceView = self.view
-                self.presentViewController(alertController, animated: true, completion: nil)
-            }
-        case .Authorized:
-            loadLastPhoto()
         }
     }
     
@@ -81,8 +86,8 @@ class ViewController: UIViewController, HomeSceneDelegate, UIDocumentInteraction
         let option = PHFetchOptions()
         option.predicate = NSPredicate(format: "mediaType == %d", PHAssetMediaType.Image.rawValue)
         option.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
-        let result = PHAsset.fetchAssetsWithOptions(option)
-        if let asset = result.firstObject as? PHAsset {
+        fetchResult = PHAsset.fetchAssetsWithOptions(option)
+        if let asset = fetchResult?.firstObject as? PHAsset {
             let options = PHImageRequestOptions()
             options.networkAccessAllowed = true
             options.deliveryMode = .HighQualityFormat
@@ -104,11 +109,25 @@ class ViewController: UIViewController, HomeSceneDelegate, UIDocumentInteraction
             }
         }
         else {
-            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(2 * Double(NSEC_PER_SEC))), dispatch_get_main_queue()) {
+            dispatch_async(dispatch_get_main_queue(), { () -> Void in
                 let alertController = UIAlertController(title: "No Picture", message: "Needs to Take a Picture.", preferredStyle: .Alert)
                 alertController.addAction(UIAlertAction(title: "OK", style: .Default, handler: nil))
                 alertController.popoverPresentationController?.sourceView = self.view
                 self.presentViewController(alertController, animated: true, completion: nil)
+            })
+        }
+    }
+    
+    func photoLibraryDidChange(changeInstance: PHChange!) {
+        if let details = changeInstance.changeDetailsForFetchResult(fetchResult) {
+            var isNewPhoto = details.insertedIndexes?.firstIndex == 0 ? true : false
+            if isNewPhoto == true {
+                if let scene = homeSceneView?.scene as? HomeScene {
+                    scene.resetImage()
+                }
+                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(0.5 * Double(NSEC_PER_SEC))), dispatch_get_main_queue()) {
+                    self.loadLastPhoto()
+                }
             }
         }
     }
@@ -216,7 +235,9 @@ class ViewController: UIViewController, HomeSceneDelegate, UIDocumentInteraction
                     picker.dismissViewControllerAnimated(true, completion: {[weak self] () -> Void in
                         if let scene = self?.homeSceneView?.scene as? HomeScene {
                             if let squaredImage = image?.squaredImage() {
-                                scene.setImage(squaredImage)
+                                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(0.5 * Double(NSEC_PER_SEC))), dispatch_get_main_queue()) {
+                                    scene.setImage(squaredImage)
+                                }
                             }
                         }
                     })
@@ -328,7 +349,7 @@ class ViewController: UIViewController, HomeSceneDelegate, UIDocumentInteraction
     
     func doYouLikePicshot() {
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(1.5 * Double(NSEC_PER_SEC))), dispatch_get_main_queue()) {
-            let alertController = UIAlertController(title: "Do You Like picshot?", message: nil, preferredStyle: .Alert)
+            let alertController = UIAlertController(title: "Do you like picshot?", message: nil, preferredStyle: .Alert)
             alertController.addAction(UIAlertAction(title: "Tell a Friend", style: .Default, handler: { (action) -> Void in
                 if let url = NSURL(string: "https://itunes.apple.com/app/id\(AppId)") {
                     let viewController = UIActivityViewController(activityItems: [url, "I Like #picshot"], applicationActivities: nil)
