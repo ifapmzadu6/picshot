@@ -14,6 +14,7 @@ protocol HomeSceneDelegate: NSObjectProtocol {
     func didSelectFacebook()
     func willSelectInstagram()
     func didSelectInstagram()
+    func didSelectCameraButton()
     func didSelectAlbumButton()
 }
 
@@ -36,6 +37,7 @@ class HomeScene: SKScene {
     var instagramNode: SKShapeNode?
     var instagramIconNode: SKShapeNode?
     
+    var cameraNode: SKSpriteNode?
     var albumImageNode: SKSpriteNode?
     
     var isDragging: Bool = false
@@ -127,12 +129,12 @@ class HomeScene: SKScene {
         if let node = arrowNode {
             node.fillColor = UIColor(white: 0.9, alpha: 1)
             node.position = center
-            node.position.y -= radius + 30
+            node.position.y -= centerRadius + 30
             node.alpha = 0
             addChild(node)
         }
         
-        imageNode = SKShapeNode(circleOfRadius: radius)
+        imageNode = SKShapeNode(circleOfRadius: centerRadius)
         if let node = imageNode {
             node.fillColor = UIColor.whiteColor()
             node.position = center
@@ -143,11 +145,11 @@ class HomeScene: SKScene {
             node.runAction(SKAction.scaleTo(0, duration: 0))
         }
         
-        splashNode = SKShapeNode(circleOfRadius: radius)
+        splashNode = SKShapeNode(circleOfRadius: centerRadius)
         if let node = splashNode {
             node.fillColor = UIColor.clearColor()
-            node.strokeColor = UIColor(white: 0.92, alpha: 1)
-            node.lineWidth = 3
+            node.strokeColor = twitterColor
+            node.lineWidth = 2
             node.position = center
             node.zPosition = 0
             node.alpha = 0
@@ -174,7 +176,7 @@ class HomeScene: SKScene {
             node.fontSize = 20
             node.fontColor = UIColor(white: 0.8, alpha: 1)
             node.position = center
-            node.position.y -= radius + 70
+            node.position.y -= centerRadius + 70
             node.alpha = 0
             addChild(node)
         }
@@ -198,6 +200,14 @@ class HomeScene: SKScene {
             addChild(node)
         }
         
+        cameraNode = SKSpriteNode(imageNamed: "CameraIcon")
+        if let node = cameraNode {
+            node.size = CGSizeMake(44, 44)
+            node.position = CGPointMake(22, 21)
+            node.alpha = 0
+            addChild(node)
+        }
+        
         albumImageNode = SKSpriteNode(imageNamed: "SearchIcon")
         if let node = albumImageNode {
             node.size = CGSizeMake(44, 44)
@@ -216,12 +226,18 @@ class HomeScene: SKScene {
                     isDragging = true
                     draggingPosition = position
                     
+                    imageNode?.removeAllActions()
+                    let scale = radius / centerRadius
+                    imageNode?.runAction(SKAction.scaleTo(scale, duration: 0.1))
                     titleNode?.runAction(SKAction.fadeAlphaTo(0, duration: 0.2))
                     pointerNode?.runAction(SKAction.fadeAlphaTo(0.2, duration: 0.2))
                     splashNode?.removeAllActions()
                     splashNode?.runAction(SKAction.fadeAlphaTo(0, duration: 0.2))
                 }
                 
+                if nodeAtPoint(position) == cameraNode {
+                    myDelegate?.didSelectCameraButton()
+                }
                 if nodeAtPoint(position) == albumImageNode {
                     myDelegate?.didSelectAlbumButton()
                 }
@@ -239,6 +255,8 @@ class HomeScene: SKScene {
                 let x = cosx * radius / 1.5
                 let y = sinx * radius / 1.5
                 imageNode?.runAction(SKAction.moveTo(CGPointMake(center.x + x, center.y + y), duration: 0.05))
+                let scale = self.radius / centerRadius
+                imageNode?.runAction(SKAction.scaleTo(scale, duration: 0.05))
                 
                 if radius < 100 || (position.y - draggingPosition.y) > 0 {
                     twitterNode?.runAction(SKAction.scaleTo(1, duration: 0.3))
@@ -313,15 +331,16 @@ class HomeScene: SKScene {
                 
                 if radius < 100 || (position.y - draggingPosition.y) > 0 {
                     titleNode?.runAction(SKAction.fadeAlphaTo(1, duration: 0.2))
+                    imageNode?.runAction(SKAction.scaleTo(1, duration: 0.8, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0.8))
                     imageNode?.runAction(SKAction.moveTo(center, duration: 0.4, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0))
                     arrowNode?.runAction(SKAction.fadeAlphaTo(1, duration: 0.1))
                     pointerNode?.runAction(SKAction.scaleTo(0, duration: 0.1))
                     pointerNode?.runAction(SKAction.fadeAlphaTo(0, duration: 0.1))
                     pullToLabelNode?.runAction(SKAction.fadeAlphaTo(1, duration: 0.1))
                     releaseToLabelNode?.runAction(SKAction.fadeAlphaTo(0, duration: 0.1))
-                    let expand = SKAction.group([SKAction.scaleTo(2, duration: 2), SKAction.fadeAlphaTo(0, duration: 1.5)])
+                    let expand = SKAction.group([SKAction.scaleTo(2, duration: 2), SKAction.fadeAlphaTo(0, duration: 2)])
                     let reset = SKAction.group([SKAction.scaleTo(0.5, duration: 0), SKAction.fadeAlphaTo(1, duration: 0)])
-                    splashNode?.runAction(SKAction.repeatActionForever(SKAction.sequence([expand, reset, SKAction.waitForDuration(1.5)])))
+                    splashNode?.runAction(SKAction.repeatActionForever(SKAction.sequence([expand, reset, SKAction.waitForDuration(1)])))
                 }
                 else {
                     var theta = atan((position.y - draggingPosition.y)/(position.x - draggingPosition.x))
@@ -380,15 +399,16 @@ class HomeScene: SKScene {
                     }
                     else {
                         titleNode?.runAction(SKAction.fadeAlphaTo(1, duration: 0.2))
+                        imageNode?.runAction(SKAction.scaleTo(1, duration: 0.8, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0.5))
                         imageNode?.runAction(SKAction.moveTo(center, duration: 0.4, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0))
                         arrowNode?.runAction(SKAction.fadeAlphaTo(1, duration: 0.1))
                         pointerNode?.runAction(SKAction.scaleTo(0, duration: 0.1))
                         pointerNode?.runAction(SKAction.fadeAlphaTo(0, duration: 0.1))
                         pullToLabelNode?.runAction(SKAction.fadeAlphaTo(1, duration: 0.1))
                         releaseToLabelNode?.runAction(SKAction.fadeAlphaTo(0, duration: 0.1))
-                        let expand = SKAction.group([SKAction.scaleTo(2, duration: 2), SKAction.fadeAlphaTo(0, duration: 1.5)])
+                        let expand = SKAction.group([SKAction.scaleTo(2, duration: 2), SKAction.fadeAlphaTo(0, duration: 2)])
                         let reset = SKAction.group([SKAction.scaleTo(0.5, duration: 0), SKAction.fadeAlphaTo(1, duration: 0)])
-                        splashNode?.runAction(SKAction.repeatActionForever(SKAction.sequence([expand, reset, SKAction.waitForDuration(1.5)])))
+                        splashNode?.runAction(SKAction.repeatActionForever(SKAction.sequence([expand, reset, SKAction.waitForDuration(1)])))
                     }
                 }
                 
@@ -403,17 +423,19 @@ class HomeScene: SKScene {
         
         arrowNode?.runAction(SKAction.fadeAlphaTo(1, duration: 1, delay: 0.7, usingSpringWithDamping: 1, initialSpringVelocity: 0))
         pullToLabelNode?.runAction(SKAction.fadeAlphaTo(1, duration: 1, delay: 0.7, usingSpringWithDamping: 1, initialSpringVelocity: 0))
+        cameraNode?.runAction(SKAction.fadeAlphaTo(0.2, duration: 1, delay: 0.7, usingSpringWithDamping: 1, initialSpringVelocity: 0))
         albumImageNode?.runAction(SKAction.fadeAlphaTo(0.2, duration: 1, delay: 0.7, usingSpringWithDamping: 1, initialSpringVelocity: 0))
         
-        let expand = SKAction.group([SKAction.scaleTo(2, duration: 2), SKAction.fadeAlphaTo(0, duration: 1.5)])
+        let expand = SKAction.group([SKAction.scaleTo(2, duration: 2), SKAction.fadeAlphaTo(0, duration: 2)])
         let reset = SKAction.group([SKAction.scaleTo(0.5, duration: 0), SKAction.fadeAlphaTo(1, duration: 0)])
-        splashNode?.runAction(SKAction.repeatActionForever(SKAction.sequence([expand, reset, SKAction.waitForDuration(1.5)])))
+        splashNode?.runAction(SKAction.repeatActionForever(SKAction.sequence([expand, reset, SKAction.waitForDuration(2)])))
     }
     
     func resetImage() {
         imageNode?.runAction(SKAction.scaleTo(0, duration: 0))
         arrowNode?.alpha = 0
         pullToLabelNode?.alpha = 0
+        cameraNode?.alpha = 0
         albumImageNode?.alpha = 0
         splashNode?.removeAllActions()
         splashNode?.alpha = 0
@@ -422,6 +444,7 @@ class HomeScene: SKScene {
     func reset() {
         titleNode?.alpha = 1
         imageNode?.alpha = 1
+        imageNode?.runAction(SKAction.scaleTo(1, duration: 0))
         imageNode?.position = center
         arrowNode?.runAction(SKAction.fadeAlphaTo(1, duration: 0.1))
         pointerNode?.runAction(SKAction.fadeAlphaTo(0, duration: 0.1))
@@ -439,15 +462,21 @@ class HomeScene: SKScene {
         instagramNode?.runAction(SKAction.scaleTo(1, duration: 0.6), completion: {
             self.instagramIconNode?.runAction(SKAction.fadeAlphaTo(1, duration: 0.05))
         })
-        let expand = SKAction.group([SKAction.scaleTo(2, duration: 2), SKAction.fadeAlphaTo(0, duration: 1.5)])
+        let expand = SKAction.group([SKAction.scaleTo(2, duration: 2), SKAction.fadeAlphaTo(0, duration: 2)])
         let reset = SKAction.group([SKAction.scaleTo(0.5, duration: 0), SKAction.fadeAlphaTo(1, duration: 0)])
-        splashNode?.runAction(SKAction.repeatActionForever(SKAction.sequence([expand, reset, SKAction.waitForDuration(1.5)])))
+        splashNode?.runAction(SKAction.repeatActionForever(SKAction.sequence([expand, reset, SKAction.waitForDuration(2)])))
     }
     
     
     private var radius: CGFloat {
         if let view = view {
             return view.bounds.size.width / 8
+        }
+        return 0
+    }
+    private var centerRadius: CGFloat {
+        if let view = view {
+            return view.bounds.size.width / 7.5
         }
         return 0
     }

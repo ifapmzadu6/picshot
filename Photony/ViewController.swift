@@ -201,6 +201,14 @@ class ViewController: UIViewController, HomeSceneDelegate, UIDocumentInteraction
         }
     }
     
+    func didSelectCameraButton() {
+        let viewController = UIImagePickerController()
+        viewController.sourceType = .Camera
+        viewController.delegate = self
+        viewController.popoverPresentationController?.sourceView = view
+        presentViewController(viewController, animated: true, completion: nil)
+    }
+    
     func didSelectAlbumButton() {
         Analytics.sendEvent(category: "album", action: "open")
         
@@ -222,30 +230,38 @@ class ViewController: UIViewController, HomeSceneDelegate, UIDocumentInteraction
         if let scene = homeSceneView?.scene as? HomeScene {
             scene.resetImage()
         }
-        let assetURL = info[UIImagePickerControllerReferenceURL] as? NSURL
-        if let assetURL = assetURL {
-            let fetchOptions = PHFetchOptions()
-            fetchOptions.predicate = NSPredicate(format: "mediaType == %d", PHAssetMediaType.Image.rawValue)
-            let result = PHAsset.fetchAssetsWithALAssetURLs([assetURL], options: fetchOptions)
-            if let asset = result.firstObject as? PHAsset {
-                let options = PHImageRequestOptions()
-                options.networkAccessAllowed = true
-                options.deliveryMode = .HighQualityFormat
-                PHImageManager.defaultManager().requestImageForAsset(asset, targetSize: CGSizeMake(200, 200), contentMode: .AspectFill, options: options) { (image, info) -> Void in
-                    picker.dismissViewControllerAnimated(true, completion: {[weak self] () -> Void in
-                        if let scene = self?.homeSceneView?.scene as? HomeScene {
-                            if let squaredImage = image?.squaredImage() {
-                                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(0.5 * Double(NSEC_PER_SEC))), dispatch_get_main_queue()) {
-                                    scene.setImage(squaredImage)
+        if picker.sourceType == .Camera {
+            if let image = info[UIImagePickerControllerOriginalImage] as? UIImage {
+                UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)
+                picker.dismissViewControllerAnimated(true, completion: nil)
+            }
+        }
+        else {
+            let assetURL = info[UIImagePickerControllerReferenceURL] as? NSURL
+            if let assetURL = assetURL {
+                let fetchOptions = PHFetchOptions()
+                fetchOptions.predicate = NSPredicate(format: "mediaType == %d", PHAssetMediaType.Image.rawValue)
+                let result = PHAsset.fetchAssetsWithALAssetURLs([assetURL], options: fetchOptions)
+                if let asset = result.firstObject as? PHAsset {
+                    let options = PHImageRequestOptions()
+                    options.networkAccessAllowed = true
+                    options.deliveryMode = .HighQualityFormat
+                    PHImageManager.defaultManager().requestImageForAsset(asset, targetSize: CGSizeMake(200, 200), contentMode: .AspectFill, options: options) { (image, info) -> Void in
+                        picker.dismissViewControllerAnimated(true, completion: {[weak self] () -> Void in
+                            if let scene = self?.homeSceneView?.scene as? HomeScene {
+                                if let squaredImage = image?.squaredImage() {
+                                    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(0.5 * Double(NSEC_PER_SEC))), dispatch_get_main_queue()) {
+                                        scene.setImage(squaredImage)
+                                    }
                                 }
                             }
-                        }
-                    })
-                }
-                
-                options.resizeMode = .None
-                PHImageManager.defaultManager().requestImageForAsset(asset, targetSize: CGSizeMake(CGFloat(asset.pixelWidth), CGFloat(asset.pixelHeight)), contentMode: .AspectFill, options: options) { (image, info) -> Void in
-                    self.originalImage = image
+                            })
+                    }
+                    
+                    options.resizeMode = .None
+                    PHImageManager.defaultManager().requestImageForAsset(asset, targetSize: CGSizeMake(CGFloat(asset.pixelWidth), CGFloat(asset.pixelHeight)), contentMode: .AspectFill, options: options) { (image, info) -> Void in
+                        self.originalImage = image
+                    }
                 }
             }
         }
