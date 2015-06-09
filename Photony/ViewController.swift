@@ -42,7 +42,7 @@ class ViewController: UIViewController, HomeSceneDelegate, UIDocumentInteraction
         
         showHomeScene()
         
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(2.3 * Double(NSEC_PER_SEC))), dispatch_get_main_queue()) {
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(2 * Double(NSEC_PER_SEC))), dispatch_get_main_queue()) {
             switch PHPhotoLibrary.authorizationStatus() {
             case .NotDetermined:
                 dispatch_async(dispatch_get_main_queue(), { () -> Void in
@@ -202,11 +202,15 @@ class ViewController: UIViewController, HomeSceneDelegate, UIDocumentInteraction
     }
     
     func didSelectCameraButton() {
-        let viewController = UIImagePickerController()
-        viewController.sourceType = .Camera
-        viewController.delegate = self
-        viewController.popoverPresentationController?.sourceView = view
-        presentViewController(viewController, animated: true, completion: nil)
+        if UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera) == true {
+            let viewController = UIImagePickerController()
+            viewController.delegate = self
+            viewController.sourceType = .Camera
+            viewController.cameraFlashMode = UIImagePickerControllerCameraFlashMode.Off
+            viewController.cameraDevice = UIImagePickerControllerCameraDevice.Rear
+            viewController.popoverPresentationController?.sourceView = view
+            presentViewController(viewController, animated: true, completion: nil)
+        }
     }
     
     func didSelectAlbumButton() {
@@ -400,4 +404,5 @@ class ViewController: UIViewController, HomeSceneDelegate, UIDocumentInteraction
         return url
     }
 }
+
 
