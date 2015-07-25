@@ -462,10 +462,10 @@ class HomeScene: SKScene {
     
     
     private func animateSplashNode() {
-        let expand = SKAction.group([SKAction.scaleTo(2, duration: 3), SKAction.fadeAlphaTo(0, duration: 3)])
+        let expand = SKAction.group([SKAction.scaleTo(1.5, duration: 3), SKAction.fadeAlphaTo(0, duration: 3)])
         expand.timingMode = SKActionTimingMode.EaseOut
         let reset = SKAction.group([SKAction.scaleTo(0.45, duration: 0), SKAction.fadeAlphaTo(1, duration: 0)])
-        splashNode?.runAction(SKAction.repeatActionForever(SKAction.sequence([expand, reset])))
+        splashNode?.runAction(SKAction.repeatActionForever(SKAction.sequence([expand, reset, SKAction.waitForDuration(2)])))
     }
     
     private var radius: CGFloat {
