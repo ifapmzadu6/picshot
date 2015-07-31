@@ -235,6 +235,8 @@ class HomeScene: SKScene {
                     pointerNode?.runAction(SKAction.fadeAlphaTo(0.2, duration: 0.2))
                     splashNode?.removeAllActions()
                     splashNode?.runAction(SKAction.fadeAlphaTo(0, duration: 0.2))
+                    cameraNode?.runAction(SKAction.fadeAlphaTo(0, duration: 0.2))
+                    albumImageNode?.runAction(SKAction.fadeAlphaTo(0, duration: 0.2))
                 }
                 
                 if nodeAtPoint(position) == cameraNode {
@@ -340,6 +342,8 @@ class HomeScene: SKScene {
                     pointerNode?.runAction(SKAction.fadeAlphaTo(0, duration: 0.1))
                     pullToLabelNode?.runAction(SKAction.fadeAlphaTo(1, duration: 0.1))
                     releaseToLabelNode?.runAction(SKAction.fadeAlphaTo(0, duration: 0.1))
+                    cameraNode?.runAction(SKAction.fadeAlphaTo(0.2, duration: 0.1))
+                    albumImageNode?.runAction(SKAction.fadeAlphaTo(0.2, duration: 0.1))
                     animateSplashNode()
                 }
                 else {
@@ -457,6 +461,8 @@ class HomeScene: SKScene {
         instagramNode?.runAction(SKAction.scaleTo(1, duration: 0.6), completion: {
             self.instagramIconNode?.runAction(SKAction.fadeAlphaTo(1, duration: 0.05))
         })
+        cameraNode?.alpha = 0.2
+        albumImageNode?.alpha = 0.2
         animateSplashNode()
     }
     
