@@ -1,0 +1,40 @@
+machine:
+  xcode:
+    version: "6.3.1"
+  environment:
+    XCODE_WORKSPACE: Photony.xcworkspace
+    XCODE_SCHEME: Photony
+    LANG: en_US.UTF-8
+dependencies:
+  cache_directories:
+    - "Pods"
+  pre:
+    - sudo gem install cocoapods
+    - pod setup
+test:
+  override:
+    - set -o pipefail && xcodebuild test -scheme ${XCODE_SCHEME} -workspace ${XCODE_WORKSPACE} -destination 'platform=iOS Simulator,OS=8.1,name=iPad 2' | tee $CIRCLE_ARTIFACTS/xcode_raw.log | xcpretty --color --report junit --output $CIRCLE_TEST_REPORTS/xcode/results.xml
+    - set -o pipefail && xcodebuild test -scheme ${XCODE_SCHEME} -workspace ${XCODE_WORKSPACE} -destination 'platform=iOS Simulator,OS=8.2,name=iPad 2' | tee $CIRCLE_ARTIFACTS/xcode_raw.log | xcpretty --color --report junit --output $CIRCLE_TEST_REPORTS/xcode/results.xml
+    - set -o pipefail && xcodebuild test -scheme ${XCODE_SCHEME} -workspace ${XCODE_WORKSPACE} -destination 'platform=iOS Simulator,OS=8.3,name=iPad 2' | tee $CIRCLE_ARTIFACTS/xcode_raw.log | xcpretty --color --report junit --output $CIRCLE_TEST_REPORTS/xcode/results.xml
+    - set -o pipefail && xcodebuild test -scheme ${XCODE_SCHEME} -workspace ${XCODE_WORKSPACE} -destination 'platform=iOS Simulator,OS=8.1,name=iPad Air' | tee $CIRCLE_ARTIFACTS/xcode_raw.log | xcpretty --color --report junit --output $CIRCLE_TEST_REPORTS/xcode/results.xml
+    - set -o pipefail && xcodebuild test -scheme ${XCODE_SCHEME} -workspace ${XCODE_WORKSPACE} -destination 'platform=iOS Simulator,OS=8.2,name=iPad Air' | tee $CIRCLE_ARTIFACTS/xcode_raw.log | xcpretty --color --report junit --output $CIRCLE_TEST_REPORTS/xcode/results.xml
+    - set -o pipefail && xcodebuild test -scheme ${XCODE_SCHEME} -workspace ${XCODE_WORKSPACE} -destination 'platform=iOS Simulator,OS=8.3,name=iPad Air' | tee $CIRCLE_ARTIFACTS/xcode_raw.log | xcpretty --color --report junit --output $CIRCLE_TEST_REPORTS/xcode/results.xml
+    - set -o pipefail && xcodebuild test -scheme ${XCODE_SCHEME} -workspace ${XCODE_WORKSPACE} -destination 'platform=iOS Simulator,OS=8.1,name=iPad Retina' | tee $CIRCLE_ARTIFACTS/xcode_raw.log | xcpretty --color --report junit --output $CIRCLE_TEST_REPORTS/xcode/results.xml
+    - set -o pipefail && xcodebuild test -scheme ${XCODE_SCHEME} -workspace ${XCODE_WORKSPACE} -destination 'platform=iOS Simulator,OS=8.2,name=iPad Retina' | tee $CIRCLE_ARTIFACTS/xcode_raw.log | xcpretty --color --report junit --output $CIRCLE_TEST_REPORTS/xcode/results.xml
+    - set -o pipefail && xcodebuild test -scheme ${XCODE_SCHEME} -workspace ${XCODE_WORKSPACE} -destination 'platform=iOS Simulator,OS=8.3,name=iPad Retina' | tee $CIRCLE_ARTIFACTS/xcode_raw.log | xcpretty --color --report junit --output $CIRCLE_TEST_REPORTS/xcode/results.xml
+    - set -o pipefail && xcodebuild test -scheme ${XCODE_SCHEME} -workspace ${XCODE_WORKSPACE} -destination 'platform=iOS Simulator,OS=8.1,name=iPhone 4s' | tee $CIRCLE_ARTIFACTS/xcode_raw.log | xcpretty --color --report junit --output $CIRCLE_TEST_REPORTS/xcode/results.xml
+    - set -o pipefail && xcodebuild test -scheme ${XCODE_SCHEME} -workspace ${XCODE_WORKSPACE} -destination 'platform=iOS Simulator,OS=8.2,name=iPhone 4s' | tee $CIRCLE_ARTIFACTS/xcode_raw.log | xcpretty --color --report junit --output $CIRCLE_TEST_REPORTS/xcode/results.xml
+    - set -o pipefail && xcodebuild test -scheme ${XCODE_SCHEME} -workspace ${XCODE_WORKSPACE} -destination 'platform=iOS Simulator,OS=8.3,name=iPhone 4s' | tee $CIRCLE_ARTIFACTS/xcode_raw.log | xcpretty --color --report junit --output $CIRCLE_TEST_REPORTS/xcode/results.xml
+    - set -o pipefail && xcodebuild test -scheme ${XCODE_SCHEME} -workspace ${XCODE_WORKSPACE} -destination 'platform=iOS Simulator,OS=8.1,name=iPhone 5' | tee $CIRCLE_ARTIFACTS/xcode_raw.log | xcpretty --color --report junit --output $CIRCLE_TEST_REPORTS/xcode/results.xml
+    - set -o pipefail && xcodebuild test -scheme ${XCODE_SCHEME} -workspace ${XCODE_WORKSPACE} -destination 'platform=iOS Simulator,OS=8.2,name=iPhone 5' | tee $CIRCLE_ARTIFACTS/xcode_raw.log | xcpretty --color --report junit --output $CIRCLE_TEST_REPORTS/xcode/results.xml
+    - set -o pipefail && xcodebuild test -scheme ${XCODE_SCHEME} -workspace ${XCODE_WORKSPACE} -destination 'platform=iOS Simulator,OS=8.3,name=iPhone 5' | tee $CIRCLE_ARTIFACTS/xcode_raw.log | xcpretty --color --report junit --output $CIRCLE_TEST_REPORTS/xcode/results.xml
+    - set -o pipefail && xcodebuild test -scheme ${XCODE_SCHEME} -workspace ${XCODE_WORKSPACE} -destination 'platform=iOS Simulator,OS=8.1,name=iPhone 5s' | tee $CIRCLE_ARTIFACTS/xcode_raw.log | xcpretty --color --report junit --output $CIRCLE_TEST_REPORTS/xcode/results.xml
+    - set -o pipefail && xcodebuild test -scheme ${XCODE_SCHEME} -workspace ${XCODE_WORKSPACE} -destination 'platform=iOS Simulator,OS=8.2,name=iPhone 5s' | tee $CIRCLE_ARTIFACTS/xcode_raw.log | xcpretty --color --report junit --output $CIRCLE_TEST_REPORTS/xcode/results.xml
+    - set -o pipefail && xcodebuild test -scheme ${XCODE_SCHEME} -workspace ${XCODE_WORKSPACE} -destination 'platform=iOS Simulator,OS=8.3,name=iPhone 5s' | tee $CIRCLE_ARTIFACTS/xcode_raw.log | xcpretty --color --report junit --output $CIRCLE_TEST_REPORTS/xcode/results.xml
+    - set -o pipefail && xcodebuild test -scheme ${XCODE_SCHEME} -workspace ${XCODE_WORKSPACE} -destination 'platform=iOS Simulator,OS=8.1,name=iPhone 6 Plus' | tee $CIRCLE_ARTIFACTS/xcode_raw.log | xcpretty --color --report junit --output $CIRCLE_TEST_REPORTS/xcode/results.xml
+    - set -o pipefail && xcodebuild test -scheme ${XCODE_SCHEME} -workspace ${XCODE_WORKSPACE} -destination 'platform=iOS Simulator,OS=8.2,name=iPhone 6 Plus' | tee $CIRCLE_ARTIFACTS/xcode_raw.log | xcpretty --color --report junit --output $CIRCLE_TEST_REPORTS/xcode/results.xml
+    - set -o pipefail && xcodebuild test -scheme ${XCODE_SCHEME} -workspace ${XCODE_WORKSPACE} -destination 'platform=iOS Simulator,OS=8.3,name=iPhone 6 Plus' | tee $CIRCLE_ARTIFACTS/xcode_raw.log | xcpretty --color --report junit --output $CIRCLE_TEST_REPORTS/xcode/results.xml
+    - set -o pipefail && xcodebuild test -scheme ${XCODE_SCHEME} -workspace ${XCODE_WORKSPACE} -destination 'platform=iOS Simulator,OS=8.1,name=iPhone 6' | tee $CIRCLE_ARTIFACTS/xcode_raw.log | xcpretty --color --report junit --output $CIRCLE_TEST_REPORTS/xcode/results.xml
+    - set -o pipefail && xcodebuild test -scheme ${XCODE_SCHEME} -workspace ${XCODE_WORKSPACE} -destination 'platform=iOS Simulator,OS=8.2,name=iPhone 6' | tee $CIRCLE_ARTIFACTS/xcode_raw.log | xcpretty --color --report junit --output $CIRCLE_TEST_REPORTS/xcode/results.xml
+    - set -o pipefail && xcodebuild test -scheme ${XCODE_SCHEME} -workspace ${XCODE_WORKSPACE} -destination 'platform=iOS Simulator,OS=8.3,name=iPhone 6' | tee $CIRCLE_ARTIFACTS/xcode_raw.log | xcpretty --color --report junit --output $CIRCLE_TEST_REPORTS/xcode/results.xml
+
