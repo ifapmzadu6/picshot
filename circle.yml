@@ -6,8 +6,6 @@ machine:
     XCODE_SCHEME: Photony
     LANG: en_US.UTF-8
 dependencies:
-  cache_directories:
-    - "Pods"
   pre:
     - sudo gem install cocoapods
     - pod setup
