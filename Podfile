@@ -4,7 +4,6 @@ platform :ios, '8.0'
 
 link_with 'Photony', 'PhotonyTests'
 
-pod 'GoogleAnalytics'
 pod 'Fabric'
 pod 'Crashlytics'
 

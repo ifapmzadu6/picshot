@@ -27,14 +27,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             window.makeKeyAndVisible()
         }
         
-        Fabric.with([Crashlytics()])
-        
-        if let gai = GAI.sharedInstance() {
-            gai.trackerWithTrackingId(GooeleAnalyticsId)
-            gai.dispatchInterval = 60 * 5
-            gai.trackUncaughtExceptions = false
-            gai.logger.logLevel = .None
-        }
+        // not simulator
+        #if !( (arch(i386) || arch(x86_64)) && os(iOS) )
+            Fabric.with([Crashlytics()])
+        #endif
         
         return true
     }

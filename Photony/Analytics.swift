@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import Crashlytics
 
 class Analytics: NSObject {
     
@@ -22,9 +23,7 @@ class Analytics: NSObject {
         let label = (optionalLabel != nil) ? optionalLabel : "default"
         let value = (optionalValue != nil) ? optionalValue : 0
         
-        let tracker = GAI.sharedInstance().trackerWithTrackingId(GooeleAnalyticsId)
-        let sendObject = GAIDictionaryBuilder.createEventWithCategory(category, action: action, label: label, value: value).build() as [NSObject: AnyObject];
-        tracker.send(sendObject)
+        Answers.logCustomEventWithName(category, customAttributes: ["action": action])
     }
     
 }
