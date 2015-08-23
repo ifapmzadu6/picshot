@@ -206,8 +206,8 @@ class ViewController: UIViewController, HomeSceneDelegate, UIDocumentInteraction
             let viewController = UIImagePickerController()
             viewController.delegate = self
             viewController.sourceType = .Camera
-            viewController.cameraFlashMode = UIImagePickerControllerCameraFlashMode.Off
-            viewController.cameraDevice = UIImagePickerControllerCameraDevice.Rear
+            viewController.cameraFlashMode = .Off
+            viewController.cameraDevice = .Rear
             viewController.popoverPresentationController?.sourceView = view
             presentViewController(viewController, animated: true, completion: nil)
         }
@@ -219,6 +219,7 @@ class ViewController: UIViewController, HomeSceneDelegate, UIDocumentInteraction
         let viewController = UIImagePickerController()
         viewController.delegate = self
         viewController.popoverPresentationController?.sourceView = view
+        viewController.sourceType = .SavedPhotosAlbum
         presentViewController(viewController, animated: true, completion: nil)
     }
     
