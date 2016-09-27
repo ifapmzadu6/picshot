@@ -2,8 +2,17 @@
 
 platform :ios, '8.0'
 
-link_with 'Photony', 'PhotonyTests'
+target 'Photony' do 
 
 pod 'Fabric'
 pod 'Crashlytics'
+
+end
+
+target 'PhotonyTests' do
+
+pod 'Fabric'
+pod 'Crashlytics'
+
+end
 

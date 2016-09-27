@@ -11,14 +11,18 @@ import UIKit
 extension UIImage {
     
     func squaredImage() -> UIImage? {
-        let width = CGFloat(CGImageGetWidth(CGImage))
-        let height = CGFloat(CGImageGetHeight(CGImage))
-        let length = min(width, height)
-        let x = (width - length) / 2
-        let y = (height - length) / 2
-        let cropRect = CGRectMake(x, y, length, length)
-        let imageRef = CGImageCreateWithImageInRect(CGImage, cropRect)
-        return UIImage(CGImage: imageRef, scale: scale, orientation: imageOrientation)
+        if let cgImage = cgImage {
+            let width = CGFloat(cgImage.width)
+            let height = CGFloat(cgImage.height)
+            let length = min(width, height)
+            let x = (width - length) / 2
+            let y = (height - length) / 2
+            let cropRect = CGRect(x: x, y: y, width: length, height: length)
+            if let imageRef = cgImage.cropping(to: cropRect) {
+                return UIImage(cgImage: imageRef, scale: scale, orientation: imageOrientation)
+            }
+        }
+        return nil
     }
     
 }

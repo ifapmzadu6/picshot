@@ -41,14 +41,16 @@ class HomeScene: SKScene {
     var albumImageNode: SKSpriteNode?
     
     var isDragging: Bool = false
-    var draggingPosition: CGPoint = CGPointZero
-    var bounceTimer: NSTimer?
+    var draggingPosition: CGPoint = .zero
+    var bounceTimer: Timer?
     
     
-    override func didMoveToView(view: SKView) {
-        super.didMoveToView(view)
+    
+    
+    override func didMove(to view: SKView) {
+        super.didMove(to: view)
         
-        backgroundColor = UIColor.whiteColor()
+        backgroundColor = UIColor.white
         
         titleNode = SKLabelNode(text: "picshot")
         if let node = titleNode {
@@ -70,15 +72,15 @@ class HomeScene: SKScene {
             twitterIconNode = SKShapeNode(circleOfRadius: radius * 0.7)
             if let childnode = twitterIconNode {
                 childnode.fillTexture = SKTexture(imageNamed: "TwitterIcon")
-                childnode.fillColor = UIColor.whiteColor()
+                childnode.fillColor = UIColor.white
                 childnode.lineWidth = 0
                 node.addChild(childnode)
             }
             
-            node.runAction(SKAction.scaleBy(0, duration: 0), completion: { () -> Void in
+            node.run(SKAction.scale(by: 0, duration: 0)) { () -> Void in
                 node.alpha = 1
-                node.runAction(SKAction.scaleBy(1, duration: 1, delay: 0.3, usingSpringWithDamping: 0.5, initialSpringVelocity: 0))
-            })
+                node.run(SKAction.scale(by: 1, duration: 1, delay: 1.0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0))
+            }
         }
         
         facebookNode = SKShapeNode(circleOfRadius: radius)
@@ -91,15 +93,15 @@ class HomeScene: SKScene {
             facebookIconNode = SKShapeNode(circleOfRadius: radius * 0.7)
             if let childnode = facebookIconNode {
                 childnode.fillTexture = SKTexture(imageNamed: "FacebookIcon")
-                childnode.fillColor = UIColor.whiteColor()
+                childnode.fillColor = UIColor.white
                 childnode.lineWidth = 0
                 node.addChild(childnode)
             }
             
-            node.runAction(SKAction.scaleBy(0, duration: 0), completion: { () -> Void in
+            node.run(SKAction.scale(by: 0, duration: 0)) { () -> Void in
                 node.alpha = 1
-                node.runAction(SKAction.scaleBy(1, duration: 1, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0))
-            })
+                node.run(SKAction.scale(by: 1, duration: 1, delay: 0.7, usingSpringWithDamping: 0.5, initialSpringVelocity: 0))
+            }
         }
         
         instagramNode = SKShapeNode(circleOfRadius: radius)
@@ -112,20 +114,20 @@ class HomeScene: SKScene {
             instagramIconNode = SKShapeNode(circleOfRadius: radius * 0.7)
             if let childnode = instagramIconNode {
                 childnode.fillTexture = SKTexture(imageNamed: "InstagramIcon")
-                childnode.fillColor = UIColor.whiteColor()
+                childnode.fillColor = UIColor.white
                 childnode.lineWidth = 0
                 node.addChild(childnode)
             }
             
-            node.runAction(SKAction.scaleBy(0, duration: 0), completion: { () -> Void in
+            node.run(SKAction.scale(by: 0, duration: 0)) { () -> Void in
                 node.alpha = 1
-                node.runAction(SKAction.scaleBy(1, duration: 1, delay: 0.6, usingSpringWithDamping: 0.5, initialSpringVelocity: 0))
-            })
+                node.run(SKAction.scale(by: 1, duration: 1, delay: 1.3, usingSpringWithDamping: 0.5, initialSpringVelocity: 0))
+            }
         }
         
         
-        let path = UIBezierPath.bezierPathWithArrowFromPoint(CGPointMake(0, 30), endPoint: CGPointZero, tailWidth: 15, headWidth: 30, headLength: 15)
-        arrowNode = SKShapeNode(path: path.CGPath, centered: true)
+        let path = UIBezierPath.bezierPathWithArrowFromPoint(startPoint: CGPoint(x: 0, y: 30), endPoint: .zero, tailWidth: 15, headWidth: 30, headLength: 15)
+        arrowNode = SKShapeNode(path: path.cgPath, centered: true)
         if let node = arrowNode {
             node.fillColor = UIColor(white: 0.9, alpha: 1)
             node.position = center
@@ -137,38 +139,38 @@ class HomeScene: SKScene {
         
         imageNode = SKShapeNode(circleOfRadius: centerRadius)
         if let node = imageNode {
-            node.fillColor = UIColor.whiteColor()
+            node.fillColor = UIColor.white
             node.position = center
             node.zPosition = 10
             node.alpha = 0
             addChild(node)
             
-            node.runAction(SKAction.scaleTo(0, duration: 0))
+            node.run(SKAction.scale(to: 0, duration: 0))
         }
         
         splashNode = SKShapeNode(circleOfRadius: centerRadius*2)
         if let node = splashNode {
-            node.fillColor = twitterColor.colorWithAlphaComponent(0.1)
-            node.strokeColor = twitterColor.colorWithAlphaComponent(0.7)
+            node.fillColor = twitterColor.withAlphaComponent(0.1)
+            node.strokeColor = twitterColor.withAlphaComponent(0.7)
             node.lineWidth = 2
             node.position = center
             node.zPosition = 1
             node.alpha = 0
             addChild(node)
             
-            node.runAction(SKAction.scaleTo(0, duration: 0))
+            node.run(SKAction.scale(to: 0, duration: 0))
         }
         
-        let narrowPath = UIBezierPath.bezierPathWithArrowFromPoint(CGPointMake(0, 50), endPoint: CGPointZero, tailWidth: 15, headWidth: 30, headLength: 15)
-        pointerNode = SKShapeNode(path: narrowPath.CGPath, centered: true)
+        let narrowPath = UIBezierPath.bezierPathWithArrowFromPoint(startPoint: CGPoint(x: 0, y: 50), endPoint: .zero, tailWidth: 15, headWidth: 30, headLength: 15)
+        pointerNode = SKShapeNode(path: narrowPath.cgPath, centered: true)
         if let node = pointerNode {
             node.fillColor = UIColor(white: 0.9, alpha: 1)
             node.position = center
             node.alpha = 0
             addChild(node)
             
-            node.runAction(SKAction.scaleTo(0, duration: 0))
-            node.runAction(SKAction.rotateToAngle(twitterTheta + CGFloat(M_PI_2), duration: 0))
+            node.run(SKAction.scale(to: 0, duration: 0))
+            node.run(SKAction.rotate(toAngle: twitterTheta + CGFloat(M_PI_2), duration: 0))
         }
         
         pullToLabelNode = SKLabelNode(text: "Pull Down to Share")
@@ -204,74 +206,71 @@ class HomeScene: SKScene {
         
         cameraNode = SKSpriteNode(imageNamed: "CameraIcon")
         if let node = cameraNode {
-            node.size = CGSizeMake(44, 44)
-            node.position = CGPointMake(22, 21)
+            node.size = CGSize(width: 44, height: 44)
+            node.position = CGPoint(x: 22, y: 21)
             node.alpha = 0
             addChild(node)
         }
         
         albumImageNode = SKSpriteNode(imageNamed: "SearchIcon")
         if let node = albumImageNode {
-            node.size = CGSizeMake(44, 44)
-            node.position = CGPointMake(view.bounds.size.width-22, 22)
+            node.size = CGSize(width: 44, height: 44)
+            node.position = CGPoint(x: view.bounds.size.width-22, y: 22)
             node.alpha = 0
             addChild(node)
         }
     }
     
     // MARK: -
-    override func touchesBegan(touches: Set<NSObject>, withEvent event: UIEvent) {
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         for touch in touches {
-            if let touch = touch as? UITouch, node = imageNode {
-                let position = touch.locationInNode(self)
-                if CGRectContainsPoint(node.frame, position) == true {
-                    isDragging = true
-                    draggingPosition = position
-                    
-                    imageNode?.removeAllActions()
-                    let scale = radius / centerRadius
-                    imageNode?.runAction(SKAction.scaleTo(scale, duration: 0.1))
-                    titleNode?.runAction(SKAction.fadeAlphaTo(0, duration: 0.2))
-                    pointerNode?.runAction(SKAction.fadeAlphaTo(0.2, duration: 0.2))
-                    splashNode?.removeAllActions()
-                    splashNode?.runAction(SKAction.fadeAlphaTo(0, duration: 0.2))
-                    cameraNode?.runAction(SKAction.fadeAlphaTo(0, duration: 0.2))
-                    albumImageNode?.runAction(SKAction.fadeAlphaTo(0, duration: 0.2))
-                }
+            let position = touch.location(in: self)
+            if atPoint(position) == imageNode {
+                isDragging = true
+                draggingPosition = position
                 
-                if nodeAtPoint(position) == cameraNode {
-                    myDelegate?.didSelectCameraButton()
-                }
-                if nodeAtPoint(position) == albumImageNode {
-                    myDelegate?.didSelectAlbumButton()
-                }
+                imageNode?.removeAllActions()
+                let scale = radius / centerRadius
+                imageNode?.run(SKAction.scale(to: scale, duration: 0.1))
+                titleNode?.run(SKAction.fadeAlpha(to: 0, duration: 0.2))
+                pointerNode?.run(SKAction.fadeAlpha(to: 0.2, duration: 0.2))
+                splashNode?.removeAllActions()
+                splashNode?.run(SKAction.fadeAlpha(to: 0, duration: 0.2))
+                cameraNode?.run(SKAction.fadeAlpha(to: 0, duration: 0.2))
+                albumImageNode?.run(SKAction.fadeAlpha(to: 0, duration: 0.2))
+            }
+            if atPoint(position) == cameraNode {
+                myDelegate?.didSelectCameraButton()
+            }
+            if atPoint(position) == albumImageNode {
+                myDelegate?.didSelectAlbumButton()
             }
         }
     }
     
-    override func touchesMoved(touches: Set<NSObject>, withEvent event: UIEvent) {
+    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         for touch in touches {
-            if let touch = touch as? UITouch, view = view where isDragging == true {
-                let position = touch.locationInNode(self)
+            if isDragging == true {
+                let position = touch.location(in: self)
                 let radius = sqrt(pow(position.x - draggingPosition.x, 2) + pow(position.y - draggingPosition.y, 2))
-                let cosx = (position.x - draggingPosition.x) / radius
-                let sinx = (position.y - draggingPosition.y) / radius
-                let x = cosx * radius / 1.5
-                let y = sinx * radius / 1.5
-                imageNode?.runAction(SKAction.moveTo(CGPointMake(center.x + x, center.y + y), duration: 0.05))
-                let scale = self.radius / centerRadius
-                imageNode?.runAction(SKAction.scaleTo(scale, duration: 0.05))
+                if (position.x - draggingPosition.x) != 0 && (position.y - draggingPosition.y) != 0 {
+                    let cosx = (position.x - draggingPosition.x) / radius
+                    let sinx = (position.y - draggingPosition.y) / radius
+                    let x = cosx * radius / 1.5
+                    let y = sinx * radius / 1.5
+                    imageNode?.run(SKAction.move(to: CGPoint(x: center.x + x, y: center.y + y), duration: 0.05))
+                }
                 
                 if radius < 100 || (position.y - draggingPosition.y) > 0 {
-                    twitterNode?.runAction(SKAction.scaleTo(1, duration: 0.3))
-                    facebookNode?.runAction(SKAction.scaleTo(1, duration: 0.3))
-                    instagramNode?.runAction(SKAction.scaleTo(1, duration: 0.3))
-                    pointerNode?.runAction(SKAction.scaleTo(0, duration: 0.2))
-                    pointerNode?.runAction(SKAction.fadeAlphaTo(0, duration: 0.1))
+                    twitterNode?.run(SKAction.scale(to: 1, duration: 0.3))
+                    facebookNode?.run(SKAction.scale(to: 1, duration: 0.3))
+                    instagramNode?.run(SKAction.scale(to: 1, duration: 0.3))
+                    pointerNode?.run(SKAction.scale(to: 0, duration: 0.2))
+                    pointerNode?.run(SKAction.fadeAlpha(to: 0, duration: 0.1))
                     
-                    arrowNode?.runAction(SKAction.fadeAlphaTo(1, duration: 0.1))
-                    pullToLabelNode?.runAction(SKAction.fadeAlphaTo(1, duration: 0.1))
-                    releaseToLabelNode?.runAction(SKAction.fadeAlphaTo(0, duration: 0.1))
+                    arrowNode?.run(SKAction.fadeAlpha(to: 1, duration: 0.1))
+                    pullToLabelNode?.run(SKAction.fadeAlpha(to: 1, duration: 0.1))
+                    releaseToLabelNode?.run(SKAction.fadeAlpha(to: 0, duration: 0.1))
                 }
                 else {
                     var theta = atan((position.y - draggingPosition.y)/(position.x - draggingPosition.x))
@@ -284,40 +283,40 @@ class HomeScene: SKScene {
                     let minDiff = min(min(diffTwitter, diffFacebook), diffInstagram)
                     if minDiff < CGFloat(M_PI) / 8 {
                         if minDiff == diffTwitter {
-                            twitterNode?.runAction(SKAction.scaleTo(1.2, duration: 0.3))
-                            facebookNode?.runAction(SKAction.scaleTo(1, duration: 0.3))
-                            instagramNode?.runAction(SKAction.scaleTo(1, duration: 0.3))
-                            releaseToLabelNode?.fontColor = twitterColor.colorWithAlphaComponent(0.6)
-                            pointerNode?.fillColor = twitterColor.colorWithAlphaComponent(0.4)
+                            twitterNode?.run(SKAction.scale(to: 1.2, duration: 0.3))
+                            facebookNode?.run(SKAction.scale(to: 1, duration: 0.3))
+                            instagramNode?.run(SKAction.scale(to: 1, duration: 0.3))
+                            releaseToLabelNode?.fontColor = twitterColor.withAlphaComponent(0.6)
+                            pointerNode?.fillColor = twitterColor.withAlphaComponent(0.4)
                         }
                         else if minDiff == diffFacebook {
-                            facebookNode?.runAction(SKAction.scaleTo(1.2, duration: 0.3))
-                            twitterNode?.runAction(SKAction.scaleTo(1, duration: 0.3))
-                            instagramNode?.runAction(SKAction.scaleTo(1, duration: 0.3))
-                            releaseToLabelNode?.fontColor = facebookColor.colorWithAlphaComponent(0.6)
-                            pointerNode?.fillColor = facebookColor.colorWithAlphaComponent(0.4)
+                            facebookNode?.run(SKAction.scale(to: 1.2, duration: 0.3))
+                            twitterNode?.run(SKAction.scale(to: 1, duration: 0.3))
+                            instagramNode?.run(SKAction.scale(to: 1, duration: 0.3))
+                            releaseToLabelNode?.fontColor = facebookColor.withAlphaComponent(0.6)
+                            pointerNode?.fillColor = facebookColor.withAlphaComponent(0.4)
                         }
                         else if minDiff == diffInstagram {
-                            instagramNode?.runAction(SKAction.scaleTo(1.2, duration: 0.3))
-                            twitterNode?.runAction(SKAction.scaleTo(1, duration: 0.3))
-                            facebookNode?.runAction(SKAction.scaleTo(1, duration: 0.3))
-                            releaseToLabelNode?.fontColor = instagramColor.colorWithAlphaComponent(0.6)
-                            pointerNode?.fillColor = instagramColor.colorWithAlphaComponent(0.4)
+                            instagramNode?.run(SKAction.scale(to: 1.2, duration: 0.3))
+                            twitterNode?.run(SKAction.scale(to: 1, duration: 0.3))
+                            facebookNode?.run(SKAction.scale(to: 1, duration: 0.3))
+                            releaseToLabelNode?.fontColor = instagramColor.withAlphaComponent(0.6)
+                            pointerNode?.fillColor = instagramColor.withAlphaComponent(0.4)
                         }
                         
-                        arrowNode?.runAction(SKAction.fadeAlphaTo(0, duration: 0.1))
-                        pullToLabelNode?.runAction(SKAction.fadeAlphaTo(0, duration: 0.1))
-                        releaseToLabelNode?.runAction(SKAction.fadeAlphaTo(1, duration: 0.1))
-                        pointerNode?.runAction(SKAction.fadeAlphaTo(1, duration: 0.2))
-                        pointerNode?.runAction(SKAction.scaleTo(1, duration: 0.2))
-                        pointerNode?.runAction(SKAction.rotateToAngle(theta+CGFloat(M_PI_2), duration: 0.05))
+                        arrowNode?.run(SKAction.fadeAlpha(to: 0, duration: 0.1))
+                        pullToLabelNode?.run(SKAction.fadeAlpha(to: 0, duration: 0.1))
+                        releaseToLabelNode?.run(SKAction.fadeAlpha(to: 1, duration: 0.1))
+                        pointerNode?.run(SKAction.fadeAlpha(to: 1, duration: 0.2))
+                        pointerNode?.run(SKAction.scale(to: 1, duration: 0.2))
+                        pointerNode?.run(SKAction.rotate(toAngle: theta+CGFloat(M_PI_2), duration: 0.05))
                     }
                     else {
-                        twitterNode?.runAction(SKAction.scaleTo(1, duration: 0.3))
-                        facebookNode?.runAction(SKAction.scaleTo(1, duration: 0.3))
-                        instagramNode?.runAction(SKAction.scaleTo(1, duration: 0.3))
-                        pointerNode?.runAction(SKAction.scaleTo(0, duration: 0.2))
-                        pointerNode?.runAction(SKAction.fadeAlphaTo(0, duration: 0.2))
+                        twitterNode?.run(SKAction.scale(to: 1, duration: 0.3))
+                        facebookNode?.run(SKAction.scale(to: 1, duration: 0.3))
+                        instagramNode?.run(SKAction.scale(to: 1, duration: 0.3))
+                        pointerNode?.run(SKAction.scale(to: 0, duration: 0.2))
+                        pointerNode?.run(SKAction.fadeAlpha(to: 0, duration: 0.2))
                     }
                 }
                 
@@ -325,25 +324,25 @@ class HomeScene: SKScene {
         }
     }
     
-    override func touchesEnded(touches: Set<NSObject>, withEvent event: UIEvent) {
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         for touch in touches {
-            if let touch = touch as? UITouch, view = view where isDragging == true {
+            if isDragging == true {
                 isDragging = false
                 
-                let position = touch.locationInNode(self)
+                let position = touch.location(in: self)
                 let radius = sqrt(pow(position.x - draggingPosition.x, 2) + pow(position.y - draggingPosition.y, 2))
                 
                 if radius < 100 || (position.y - draggingPosition.y) > 0 {
-                    titleNode?.runAction(SKAction.fadeAlphaTo(1, duration: 0.2))
-                    imageNode?.runAction(SKAction.scaleTo(1, duration: 0.8, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0.8))
-                    imageNode?.runAction(SKAction.moveTo(center, duration: 0.4, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0))
-                    arrowNode?.runAction(SKAction.fadeAlphaTo(1, duration: 0.1))
-                    pointerNode?.runAction(SKAction.scaleTo(0, duration: 0.1))
-                    pointerNode?.runAction(SKAction.fadeAlphaTo(0, duration: 0.1))
-                    pullToLabelNode?.runAction(SKAction.fadeAlphaTo(1, duration: 0.1))
-                    releaseToLabelNode?.runAction(SKAction.fadeAlphaTo(0, duration: 0.1))
-                    cameraNode?.runAction(SKAction.fadeAlphaTo(0.2, duration: 0.1))
-                    albumImageNode?.runAction(SKAction.fadeAlphaTo(0.2, duration: 0.1))
+                    titleNode?.run(SKAction.fadeAlpha(to: 1, duration: 0.2))
+                    imageNode?.run(SKAction.scale(to: 1, duration: 0.8, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0.8))
+                    imageNode?.run(SKAction.move(to: center, duration: 0.4, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0))
+                    arrowNode?.run(SKAction.fadeAlpha(to: 1, duration: 0.1))
+                    pointerNode?.run(SKAction.scale(to: 0, duration: 0.1))
+                    pointerNode?.run(SKAction.fadeAlpha(to: 0, duration: 0.1))
+                    pullToLabelNode?.run(SKAction.fadeAlpha(to: 1, duration: 0.1))
+                    releaseToLabelNode?.run(SKAction.fadeAlpha(to: 0, duration: 0.1))
+                    cameraNode?.run(SKAction.fadeAlpha(to: 0.2, duration: 0.1))
+                    albumImageNode?.run(SKAction.fadeAlpha(to: 0.2, duration: 0.1))
                     animateSplashNode()
                 }
                 else {
@@ -357,44 +356,44 @@ class HomeScene: SKScene {
                     let minDiff = min(min(diffTwitter, diffFacebook), diffInstagram)
                     if minDiff < CGFloat(M_PI) / 8 {
                         pointerNode?.removeAllActions()
-                        pointerNode?.runAction(SKAction.scaleTo(0, duration: 0.2))
+                        pointerNode?.run(SKAction.scale(to: 0, duration: 0.2))
                         pointerNode?.alpha = 0
                         
-                        if let twitterNode = twitterNode, facebookNode = facebookNode, instagramNode = instagramNode {
+                        if let twitterNode = twitterNode, let facebookNode = facebookNode, let instagramNode = instagramNode {
                             if minDiff == diffTwitter {
-                                imageNode?.runAction(SKAction.moveTo(twitterNode.position, duration: 0.18), completion: {
-                                    self.imageNode?.runAction(SKAction.fadeAlphaTo(0, duration: 0.3))
-                                    self.twitterIconNode?.runAction(SKAction.fadeAlphaTo(0, duration: 0.05))
+                                imageNode?.run(SKAction.move(to: twitterNode.position, duration: 0.18), completion: {
+                                    self.imageNode?.run(SKAction.fadeAlpha(to: 0, duration: 0.3))
+                                    self.twitterIconNode?.run(SKAction.fadeAlpha(to: 0, duration: 0.05))
                                     twitterNode.zPosition = 100
                                     facebookNode.zPosition = 0
                                     instagramNode.zPosition = 0
-                                    twitterNode.runAction(SKAction.scaleTo(20, duration: 0.6), completion: {
+                                    twitterNode.run(SKAction.scale(to: 20, duration: 0.6), completion: {
                                         self.myDelegate?.didSelectTwitter()
                                     })
                                 })
                             }
                             else if minDiff == diffFacebook {
-                                imageNode?.runAction(SKAction.moveTo(facebookNode.position, duration: 0.18), completion: {
-                                    self.imageNode?.runAction(SKAction.fadeAlphaTo(0, duration: 0.3))
-                                    self.facebookIconNode?.runAction(SKAction.fadeAlphaTo(0, duration: 0.05))
+                                imageNode?.run(SKAction.move(to: facebookNode.position, duration: 0.18), completion: {
+                                    self.imageNode?.run(SKAction.fadeAlpha(to: 0, duration: 0.3))
+                                    self.facebookIconNode?.run(SKAction.fadeAlpha(to: 0, duration: 0.05))
                                     facebookNode.zPosition = 100
                                     twitterNode.zPosition = 0
                                     instagramNode.zPosition = 0
-                                    facebookNode.runAction(SKAction.scaleTo(20, duration: 0.6), completion: {
+                                    facebookNode.run(SKAction.scale(to: 20, duration: 0.6), completion: {
                                         self.myDelegate?.didSelectFacebook()
                                     })
                                 })
                             }
                             else if minDiff == diffInstagram {
-                                imageNode?.runAction(SKAction.moveTo(instagramNode.position, duration: 0.18), completion: {
+                                imageNode?.run(SKAction.move(to: instagramNode.position, duration: 0.18), completion: {
                                     self.myDelegate?.willSelectInstagram()
                                     
-                                    self.imageNode?.runAction(SKAction.fadeAlphaTo(0, duration: 0.3))
-                                    self.instagramIconNode?.runAction(SKAction.fadeAlphaTo(0, duration: 0.05))
+                                    self.imageNode?.run(SKAction.fadeAlpha(to: 0, duration: 0.3))
+                                    self.instagramIconNode?.run(SKAction.fadeAlpha(to: 0, duration: 0.05))
                                     instagramNode.zPosition = 100
                                     twitterNode.zPosition = 0
                                     facebookNode.zPosition = 0
-                                    instagramNode.runAction(SKAction.scaleTo(20, duration: 0.6), completion: {
+                                    instagramNode.run(SKAction.scale(to: 20, duration: 0.6), completion: {
                                         self.myDelegate?.didSelectInstagram()
                                     })
                                 })
@@ -402,14 +401,14 @@ class HomeScene: SKScene {
                         }
                     }
                     else {
-                        titleNode?.runAction(SKAction.fadeAlphaTo(1, duration: 0.2))
-                        imageNode?.runAction(SKAction.scaleTo(1, duration: 0.8, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0.5))
-                        imageNode?.runAction(SKAction.moveTo(center, duration: 0.4, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0))
-                        arrowNode?.runAction(SKAction.fadeAlphaTo(1, duration: 0.1))
-                        pointerNode?.runAction(SKAction.scaleTo(0, duration: 0.1))
-                        pointerNode?.runAction(SKAction.fadeAlphaTo(0, duration: 0.1))
-                        pullToLabelNode?.runAction(SKAction.fadeAlphaTo(1, duration: 0.1))
-                        releaseToLabelNode?.runAction(SKAction.fadeAlphaTo(0, duration: 0.1))
+                        titleNode?.run(SKAction.fadeAlpha(to: 1, duration: 0.2))
+                        imageNode?.run(SKAction.scale(to: 1, duration: 0.8, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0.5))
+                        imageNode?.run(SKAction.move(to: center, duration: 0.4, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0))
+                        arrowNode?.run(SKAction.fadeAlpha(to: 1, duration: 0.1))
+                        pointerNode?.run(SKAction.scale(to: 0, duration: 0.1))
+                        pointerNode?.run(SKAction.fadeAlpha(to: 0, duration: 0.1))
+                        pullToLabelNode?.run(SKAction.fadeAlpha(to: 1, duration: 0.1))
+                        releaseToLabelNode?.run(SKAction.fadeAlpha(to: 0, duration: 0.1))
                         animateSplashNode()
                     }
                 }
@@ -421,17 +420,17 @@ class HomeScene: SKScene {
     func setImage(image: UIImage) {
         imageNode?.fillTexture = SKTexture(image: image)
         imageNode?.alpha = 1
-        imageNode?.runAction(SKAction.scaleTo(1, duration: 1, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0))
+        imageNode?.run(SKAction.scale(to: 1, duration: 1, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0))
         
-        arrowNode?.runAction(SKAction.fadeAlphaTo(1, duration: 1, delay: 0.7, usingSpringWithDamping: 1, initialSpringVelocity: 0))
-        pullToLabelNode?.runAction(SKAction.fadeAlphaTo(1, duration: 1, delay: 0.7, usingSpringWithDamping: 1, initialSpringVelocity: 0))
-        cameraNode?.runAction(SKAction.fadeAlphaTo(0.2, duration: 1, delay: 0.7, usingSpringWithDamping: 1, initialSpringVelocity: 0))
-        albumImageNode?.runAction(SKAction.fadeAlphaTo(0.2, duration: 1, delay: 0.7, usingSpringWithDamping: 1, initialSpringVelocity: 0))
+        arrowNode?.run(SKAction.fadeAlpha(to: 1, duration: 1, delay: 0.7, usingSpringWithDamping: 1, initialSpringVelocity: 0))
+        pullToLabelNode?.run(SKAction.fadeAlpha(to: 1, duration: 1, delay: 0.7, usingSpringWithDamping: 1, initialSpringVelocity: 0))
+        cameraNode?.run(SKAction.fadeAlpha(to: 0.2, duration: 1, delay: 0.7, usingSpringWithDamping: 1, initialSpringVelocity: 0))
+        albumImageNode?.run(SKAction.fadeAlpha(to: 0.2, duration: 1, delay: 0.7, usingSpringWithDamping: 1, initialSpringVelocity: 0))
         animateSplashNode()
     }
     
     func resetImage() {
-        imageNode?.runAction(SKAction.scaleTo(0, duration: 0))
+        imageNode?.run(SKAction.scale(to: 0, duration: 0))
         arrowNode?.alpha = 0
         pullToLabelNode?.alpha = 0
         cameraNode?.alpha = 0
@@ -443,23 +442,23 @@ class HomeScene: SKScene {
     func reset() {
         titleNode?.alpha = 1
         imageNode?.alpha = 1
-        imageNode?.runAction(SKAction.scaleTo(1, duration: 0))
+        imageNode?.run(SKAction.scale(to: 1, duration: 0))
         imageNode?.position = center
-        arrowNode?.runAction(SKAction.fadeAlphaTo(1, duration: 0.1))
-        pointerNode?.runAction(SKAction.fadeAlphaTo(0, duration: 0.1))
-        pullToLabelNode?.runAction(SKAction.fadeAlphaTo(1, duration: 0.1))
-        releaseToLabelNode?.runAction(SKAction.fadeAlphaTo(0, duration: 0.1))
+        arrowNode?.run(SKAction.fadeAlpha(to: 1, duration: 0.1))
+        pointerNode?.run(SKAction.fadeAlpha(to: 0, duration: 0.1))
+        pullToLabelNode?.run(SKAction.fadeAlpha(to: 1, duration: 0.1))
+        releaseToLabelNode?.run(SKAction.fadeAlpha(to: 0, duration: 0.1))
         twitterNode?.alpha = 1
-        twitterNode?.runAction(SKAction.scaleTo(1, duration: 0.6), completion: {
-            self.twitterIconNode?.runAction(SKAction.fadeAlphaTo(1, duration: 0.05))
+        twitterNode?.run(SKAction.scale(to: 1, duration: 0.6), completion: {
+            self.twitterIconNode?.run(SKAction.fadeAlpha(to: 1, duration: 0.05))
         })
         facebookNode?.alpha = 1
-        facebookNode?.runAction(SKAction.scaleTo(1, duration: 0.6), completion: {
-            self.facebookIconNode?.runAction(SKAction.fadeAlphaTo(1, duration: 0.05))
+        facebookNode?.run(SKAction.scale(to: 1, duration: 0.6), completion: {
+            self.facebookIconNode?.run(SKAction.fadeAlpha(to: 1, duration: 0.05))
         })
         instagramNode?.alpha = 1
-        instagramNode?.runAction(SKAction.scaleTo(1, duration: 0.6), completion: {
-            self.instagramIconNode?.runAction(SKAction.fadeAlphaTo(1, duration: 0.05))
+        instagramNode?.run(SKAction.scale(to: 1, duration: 0.6), completion: {
+            self.instagramIconNode?.run(SKAction.fadeAlpha(to: 1, duration: 0.05))
         })
         cameraNode?.alpha = 0.2
         albumImageNode?.alpha = 0.2
@@ -468,10 +467,10 @@ class HomeScene: SKScene {
     
     
     private func animateSplashNode() {
-        let expand = SKAction.group([SKAction.scaleTo(1.5, duration: 3), SKAction.fadeAlphaTo(0, duration: 3)])
-        expand.timingMode = SKActionTimingMode.EaseOut
-        let reset = SKAction.group([SKAction.scaleTo(0.45, duration: 0), SKAction.fadeAlphaTo(1, duration: 0)])
-        splashNode?.runAction(SKAction.repeatActionForever(SKAction.sequence([expand, reset, SKAction.waitForDuration(2)])))
+        let expand = SKAction.group([SKAction.scale(to: 1.5, duration: 3), SKAction.fadeAlpha(to: 0, duration: 3)])
+        expand.timingMode = .easeOut
+        let reset = SKAction.group([SKAction.scale(to: 0.45, duration: 0), SKAction.fadeAlpha(to: 1, duration: 0)])
+        splashNode?.run(SKAction.repeatForever(SKAction.sequence([expand, reset, SKAction.wait(forDuration: 2)])))
     }
     
     private var radius: CGFloat {
@@ -488,27 +487,27 @@ class HomeScene: SKScene {
     }
     private var center: CGPoint {
         if let view = view {
-            return CGPointMake(view.center.x, view.bounds.height*190/568)
+            return CGPoint(x: view.center.x, y: view.bounds.height*190/568)
         }
-        return CGPointZero
+        return .zero
     }
     private var twitterCenter: CGPoint {
         if let view = view {
-            return CGPointMake(view.center.x, view.bounds.height-view.bounds.height*140/568)
+            return CGPoint(x: view.center.x, y: view.bounds.height-view.bounds.height*140/568)
         }
-        return CGPointZero
+        return .zero
     }
     private var facebookCenter: CGPoint {
         if let view = view {
-            return CGPointMake(view.bounds.size.width*3/16, view.bounds.height-view.bounds.height*180/568)
+            return CGPoint(x: view.bounds.size.width*3/16, y: view.bounds.height-view.bounds.height*180/568)
         }
-        return CGPointZero
+        return .zero
     }
     private var instagramCenter: CGPoint {
         if let view = view {
-            return CGPointMake(view.bounds.width-view.bounds.size.width*3/16, view.bounds.height-view.bounds.height*180/568)
+            return CGPoint(x: view.bounds.width-view.bounds.size.width*3/16, y: view.bounds.height-view.bounds.height*180/568)
         }
-        return CGPointZero
+        return .zero
     }
     
     private var twitterColor: UIColor {

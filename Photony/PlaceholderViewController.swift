@@ -13,7 +13,7 @@ class PlaceholderViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        view.backgroundColor = UIColor.whiteColor()
+        view.backgroundColor = UIColor.white
         
         let label = UILabel()
         label.text = "picshot"
@@ -23,6 +23,10 @@ class PlaceholderViewController: UIViewController {
         label.center.x = view.center.x - 1
         label.frame.origin.y = 43
         view.addSubview(label)
+    }
+    
+    override var prefersStatusBarHidden: Bool {
+        return true
     }
     
 }

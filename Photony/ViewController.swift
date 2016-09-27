@@ -19,113 +19,114 @@ class ViewController: UIViewController, HomeSceneDelegate, UIDocumentInteraction
     var assetURL: String?
     var originalImage: UIImage?
     
-    var fetchResult: PHFetchResult?
+    var fetchResult: PHFetchResult<PHAsset>?
     
     var instagramLabel: UILabel?
     var documentController: UIDocumentInteractionController?
     var isDocumentControllerSelected: Bool = false
     
-    func showHomeScene() {
-        homeSceneView = SKView(frame: view.bounds)
-        if let sceneView = homeSceneView {
-            let scene = HomeScene(fileNamed: "HomeScene")
-            scene.myDelegate = self
-            sceneView.presentScene(scene)
-            view.addSubview(sceneView)
-        }
-    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        view.backgroundColor = UIColor.whiteColor()
+        view.backgroundColor = UIColor.white
         
-        showHomeScene()
+        homeSceneView = SKView(frame: view.bounds)
+        if let sceneView = homeSceneView {
+            let scene = HomeScene(fileNamed: "HomeScene")
+            scene?.myDelegate = self
+            sceneView.presentScene(scene)
+            view.addSubview(sceneView)
+        }
         
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(2 * Double(NSEC_PER_SEC))), dispatch_get_main_queue()) {
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 2) {
             switch PHPhotoLibrary.authorizationStatus() {
-            case .NotDetermined:
-                dispatch_async(dispatch_get_main_queue(), { () -> Void in
+            case .notDetermined:
+                DispatchQueue.main.async {
                     PHPhotoLibrary.requestAuthorization { (status) -> Void in
                         switch status {
-                        case .Authorized:
-                            dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                        case .authorized:
+                            DispatchQueue.main.async {
                                 self.loadLastPhoto()
-                            })
-                        case .NotDetermined:
+                            }
+                        case .notDetermined:
                             break
-                        case .Denied:
+                        case .denied:
                             fallthrough
-                        case .Restricted:
-                            dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                                let alertController = UIAlertController(title: "Allow picshot Access to your Photos", message: "Just Go to Settings > Privacy > Photos and Switch picshot to ON.", preferredStyle: .Alert)
-                                alertController.addAction(UIAlertAction(title: "OK", style: .Default, handler: nil))
+                        case .restricted:
+                            DispatchQueue.main.async {
+                                let alertController = UIAlertController(title: "Allow picshot Access to your Photos", message: "Just Go to Settings > Privacy > Photos and Switch picshot to ON.", preferredStyle: .alert)
+                                alertController.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
                                 alertController.popoverPresentationController?.sourceView = self.view
-                                self.presentViewController(alertController, animated: true, completion: nil)
-                            })
+                                self.present(alertController, animated: true, completion: nil)
+                            }
                         }
                     }
-                })
-            case .Denied:
+                }
+            case .denied:
                 fallthrough
-            case .Restricted:
-                dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                    let alertController = UIAlertController(title: "Allow picshot Access to your Photos", message: "Just Go to Settings > Privacy > Photos and Switch picshot to ON.", preferredStyle: .Alert)
-                    alertController.addAction(UIAlertAction(title: "OK", style: .Default, handler: nil))
+            case .restricted:
+                DispatchQueue.main.async {
+                    let alertController = UIAlertController(title: "Allow picshot Access to your Photos", message: "Just Go to Settings > Privacy > Photos and Switch picshot to ON.", preferredStyle: .alert)
+                    alertController.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
                     alertController.popoverPresentationController?.sourceView = self.view
-                    self.presentViewController(alertController, animated: true, completion: nil)
-                })
-            case .Authorized:
+                    self.present(alertController, animated: true, completion: nil)
+                }
+            case .authorized:
                 self.loadLastPhoto()
-                PHPhotoLibrary.sharedPhotoLibrary().registerChangeObserver(self)
+                PHPhotoLibrary.shared().register(self)
             }
         }
+    }
+    
+    override var prefersStatusBarHidden: Bool {
+        return true
     }
     
     func loadLastPhoto() {
         let option = PHFetchOptions()
-        option.predicate = NSPredicate(format: "mediaType == %d", PHAssetMediaType.Image.rawValue)
+        option.predicate = NSPredicate(format: "mediaType == %d", PHAssetMediaType.image.rawValue)
         option.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
-        fetchResult = PHAsset.fetchAssetsWithOptions(option)
-        if let asset = fetchResult?.firstObject as? PHAsset {
+        fetchResult = PHAsset.fetchAssets(with: option)
+        if let asset = fetchResult?.firstObject {
             let options = PHImageRequestOptions()
-            options.networkAccessAllowed = true
-            options.deliveryMode = .HighQualityFormat
-            PHImageManager.defaultManager().requestImageForAsset(asset, targetSize: CGSizeMake(200, 200), contentMode: .AspectFill, options: options) { (image, info) -> Void in
-                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), { () -> Void in
+            options.isNetworkAccessAllowed = true
+            options.deliveryMode = .highQualityFormat
+            PHImageManager.default().requestImage(for: asset, targetSize: CGSize(width: 200, height: 200), contentMode: .aspectFill, options: options) { (image, info) -> Void in
+                DispatchQueue.global().async {
                     if let scene = self.homeSceneView?.scene as? HomeScene {
-                        if let squaredImage = image.squaredImage() {
-                            dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                                scene.setImage(squaredImage)
-                            })
+                        if let squaredImage = image?.squaredImage() {
+                            DispatchQueue.main.async {
+                                scene.setImage(image: squaredImage)
+                            }
                         }
                     }
-                })
+                }
             }
             
-            options.resizeMode = .None
-            PHImageManager.defaultManager().requestImageForAsset(asset, targetSize: CGSizeMake(CGFloat(asset.pixelWidth), CGFloat(asset.pixelHeight)), contentMode: .AspectFill, options: options) { (image, info) -> Void in
+            options.resizeMode = .none
+            PHImageManager.default().requestImage(for: asset, targetSize: CGSize(width: asset.pixelWidth, height: asset.pixelHeight), contentMode: .aspectFill, options: options) { (image, info) -> Void in
                 self.originalImage = image
             }
         }
         else {
-            dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                let alertController = UIAlertController(title: "No Picture", message: "Needs to Take a Picture.", preferredStyle: .Alert)
-                alertController.addAction(UIAlertAction(title: "OK", style: .Default, handler: nil))
+            DispatchQueue.main.async {
+                let alertController = UIAlertController(title: "No Picture", message: "Needs to Take a Picture.", preferredStyle: .alert)
+                alertController.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
                 alertController.popoverPresentationController?.sourceView = self.view
-                self.presentViewController(alertController, animated: true, completion: nil)
-            })
+                self.present(alertController, animated: true, completion: nil)
+            }
         }
     }
     
-    func photoLibraryDidChange(changeInstance: PHChange!) {
-        if let details = changeInstance.changeDetailsForFetchResult(fetchResult) {
-            var isNewPhoto = details.insertedIndexes?.firstIndex == 0 ? true : false
+    func photoLibraryDidChange(_ changeInstance: PHChange) {
+        if let fetchResult = fetchResult, let details = changeInstance.changeDetails(for: fetchResult) {
+            let isNewPhoto = details.insertedIndexes?.first == 0 ? true : false
             if isNewPhoto == true {
                 if let scene = homeSceneView?.scene as? HomeScene {
                     scene.resetImage()
                 }
-                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(0.5 * Double(NSEC_PER_SEC))), dispatch_get_main_queue()) {
+                DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.5) {
                     self.loadLastPhoto()
                 }
             }
@@ -133,54 +134,64 @@ class ViewController: UIViewController, HomeSceneDelegate, UIDocumentInteraction
     }
     
     func didSelectTwitter() {
-        let viewController = SLComposeViewController(forServiceType: SLServiceTypeTwitter)
-        viewController.addImage(originalImage)
-        viewController.completionHandler = {[weak self, viewController] (result) -> Void in
-            if result == .Done {
-                Analytics.sendEvent(category: "twitter", action: "done")
-                
-                self?.doYouLikePicshot()
-            }
-            else {
-                Analytics.sendEvent(category: "twitter", action: "cancel")
-            }
-            
-            if let scene = self?.homeSceneView?.scene as? HomeScene {
-                scene.reset()
-            }
+        Analytics.sendEvent(category: "twitter", action: "open")
+        
+        if SLComposeViewController.isAvailable(forServiceType: SLServiceTypeTwitter) == false {
+            return
         }
-        viewController.popoverPresentationController?.sourceView = view
-        presentViewController(viewController, animated: true, completion: nil)
+        
+        if let viewController = SLComposeViewController(forServiceType: SLServiceTypeTwitter) {
+            viewController.add(originalImage)
+            viewController.completionHandler = {[weak self] (result) -> Void in
+                if result == .done {
+                    Analytics.sendEvent(category: "twitter", action: "done")
+                }
+                else {
+                    Analytics.sendEvent(category: "twitter", action: "cancel")
+                }
+                
+                if let scene = self?.homeSceneView?.scene as? HomeScene {
+                    scene.reset()
+                }
+            }
+            viewController.popoverPresentationController?.sourceView = view
+            present(viewController, animated: true, completion: nil)
+        }
     }
     
     func didSelectFacebook() {
-        let viewController = SLComposeViewController(forServiceType: SLServiceTypeFacebook)
-        viewController.addImage(originalImage)
-        viewController.completionHandler = {[weak self] (result) -> Void in
-            if result == .Done {
-                Analytics.sendEvent(category: "facebook", action: "done")
-                
-                self?.doYouLikePicshot()
-            }
-            else {
-                Analytics.sendEvent(category: "facebook", action: "cancel")
-            }
-            
-            if let scene = self?.homeSceneView?.scene as? HomeScene {
-                scene.reset()
-            }
+        Analytics.sendEvent(category: "facebook", action: "open")
+        
+        if SLComposeViewController.isAvailable(forServiceType: SLServiceTypeFacebook) == false {
+            return
         }
-        viewController.popoverPresentationController?.sourceView = view
-        presentViewController(viewController, animated: true, completion: nil)
+        
+        if let viewController = SLComposeViewController(forServiceType: SLServiceTypeFacebook) {
+            viewController.add(originalImage)
+            viewController.completionHandler = {[weak self] (result) -> Void in
+                if result == .done {
+                    Analytics.sendEvent(category: "facebook", action: "done")
+                }
+                else {
+                    Analytics.sendEvent(category: "facebook", action: "cancel")
+                }
+                
+                if let scene = self?.homeSceneView?.scene as? HomeScene {
+                    scene.reset()
+                }
+            }
+            viewController.popoverPresentationController?.sourceView = view
+            present(viewController, animated: true, completion: nil)
+        }
     }
     
     func willSelectInstagram() {
         instagramLabel = UILabel()
         if let label = instagramLabel {
-            label.text = "Select\nOpen in Instagram"
-            label.textColor = UIColor.whiteColor()
+            label.text = "Select\nCopy to Instagram"
+            label.textColor = UIColor.white
             label.font = UIFont(name: "Avenir-Book", size: 24)
-            label.textAlignment = .Center
+            label.textAlignment = .center
             label.numberOfLines = 2
             label.sizeToFit()
             label.center.x = view.center.x
@@ -188,7 +199,7 @@ class ViewController: UIViewController, HomeSceneDelegate, UIDocumentInteraction
             label.alpha = 0
             view.addSubview(label)
             
-            UIView.animateWithDuration(0.2, delay: 0.5, options: .CurveLinear, animations: { () -> Void in
+            UIView.animate(withDuration: 0.2, delay: 0.5, options: .curveLinear, animations: { () -> Void in
                 label.alpha = 1
             }, completion: { (finish) -> Void in
             })
@@ -202,69 +213,81 @@ class ViewController: UIViewController, HomeSceneDelegate, UIDocumentInteraction
     }
     
     func didSelectCameraButton() {
-        if UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera) == true {
-            let viewController = UIImagePickerController()
+        Analytics.sendEvent(category: "camera", action: "open")
+        
+        if UIImagePickerController.isSourceTypeAvailable(.camera) == true {
+            let viewController = ImagePickerController()
             viewController.delegate = self
-            viewController.sourceType = .Camera
-            viewController.cameraFlashMode = .Off
-            viewController.cameraDevice = .Rear
+            viewController.sourceType = .camera
+            viewController.cameraFlashMode = .off
+            viewController.cameraDevice = .rear
             viewController.popoverPresentationController?.sourceView = view
-            presentViewController(viewController, animated: true, completion: nil)
+            present(viewController, animated: true, completion: nil)
         }
     }
     
     func didSelectAlbumButton() {
         Analytics.sendEvent(category: "album", action: "open")
         
-        let viewController = UIImagePickerController()
+        let viewController = ImagePickerController()
         viewController.delegate = self
+        viewController.sourceType = .savedPhotosAlbum
         viewController.popoverPresentationController?.sourceView = view
-        viewController.sourceType = .SavedPhotosAlbum
-        presentViewController(viewController, animated: true, completion: nil)
+        present(viewController, animated: true, completion: nil)
     }
     
-    func imagePickerControllerDidCancel(picker: UIImagePickerController) {
-        Analytics.sendEvent(category: "album", action: "cancel")
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        if picker.sourceType == .camera {
+            Analytics.sendEvent(category: "camera", action: "cancel")
+        }
+        else {
+            Analytics.sendEvent(category: "album", action: "cancel")
+        }
         
-        picker.dismissViewControllerAnimated(true, completion: nil)
+        picker.dismiss(animated: true, completion: nil)
     }
     
-    func imagePickerController(picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [NSObject : AnyObject]) {
-        Analytics.sendEvent(category: "album", action: "done")
-        
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
         if let scene = homeSceneView?.scene as? HomeScene {
             scene.resetImage()
         }
-        if picker.sourceType == .Camera {
+        
+        if picker.sourceType == .camera {
+            Analytics.sendEvent(category: "camera", action: "done")
+            
             if let image = info[UIImagePickerControllerOriginalImage] as? UIImage {
                 UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)
-                picker.dismissViewControllerAnimated(true, completion: nil)
+                picker.dismiss(animated: true, completion: nil)
             }
         }
         else {
-            let assetURL = info[UIImagePickerControllerReferenceURL] as? NSURL
-            if let assetURL = assetURL {
+            Analytics.sendEvent(category: "album", action: "done")
+            
+            if let assetURL = info[UIImagePickerControllerReferenceURL] as? NSURL {
                 let fetchOptions = PHFetchOptions()
-                fetchOptions.predicate = NSPredicate(format: "mediaType == %d", PHAssetMediaType.Image.rawValue)
-                let result = PHAsset.fetchAssetsWithALAssetURLs([assetURL], options: fetchOptions)
-                if let asset = result.firstObject as? PHAsset {
+                fetchOptions.predicate = NSPredicate(format: "mediaType == %d", PHAssetMediaType.image.rawValue)
+                let result = PHAsset.fetchAssets(withALAssetURLs: [assetURL as URL], options: fetchOptions)
+                if let asset = result.firstObject {
                     let options = PHImageRequestOptions()
-                    options.networkAccessAllowed = true
-                    options.deliveryMode = .HighQualityFormat
-                    PHImageManager.defaultManager().requestImageForAsset(asset, targetSize: CGSizeMake(200, 200), contentMode: .AspectFill, options: options) { (image, info) -> Void in
-                        picker.dismissViewControllerAnimated(true, completion: {[weak self] () -> Void in
+                    options.isNetworkAccessAllowed = true
+                    options.deliveryMode = .highQualityFormat
+                    PHImageManager.default().requestImage(for: asset, targetSize: CGSize(width: 200, height: 200), contentMode: .aspectFill, options: options) { (image, info) -> Void in
+                        picker.dismiss(animated: true, completion: {[weak self] () -> Void in
                             if let scene = self?.homeSceneView?.scene as? HomeScene {
-                                if let squaredImage = image?.squaredImage() {
-                                    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(0.5 * Double(NSEC_PER_SEC))), dispatch_get_main_queue()) {
-                                        scene.setImage(squaredImage)
+                                scene.resetImage()
+                                DispatchQueue.global(qos: .background).async {
+                                    if let squaredImage = image?.squaredImage() {
+                                        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.5) {
+                                            scene.setImage(image: squaredImage)
+                                        }
                                     }
                                 }
                             }
                             })
                     }
                     
-                    options.resizeMode = .None
-                    PHImageManager.defaultManager().requestImageForAsset(asset, targetSize: CGSizeMake(CGFloat(asset.pixelWidth), CGFloat(asset.pixelHeight)), contentMode: .AspectFill, options: options) { (image, info) -> Void in
+                    options.resizeMode = .none
+                    PHImageManager.default().requestImage(for: asset, targetSize: CGSize(width: asset.pixelWidth, height: asset.pixelHeight), contentMode: .aspectFill, options: options) { (image, info) -> Void in
                         self.originalImage = image
                     }
                 }
@@ -272,32 +295,35 @@ class ViewController: UIViewController, HomeSceneDelegate, UIDocumentInteraction
         }
     }
     
-    func postInstagram(#image: UIImage) {
-        let instagramURL = NSURL(string: "instagram://app")
-        if let instagramURL = instagramURL where UIApplication.sharedApplication().canOpenURL(instagramURL) {
+    func postInstagram(image: UIImage) {
+        Analytics.sendEvent(category: "instagram", action: "open")
+        
+        let instagramURL = URL(string: "instagram://app")
+        if let instagramURL = instagramURL , UIApplication.shared.canOpenURL(instagramURL) {
             let imageData = UIImageJPEGRepresentation(image, 1)
-            let filePath = NSTemporaryDirectory().stringByAppendingString("image.igo")
-            var error: NSError?
-            if imageData.writeToFile(filePath, options: .AtomicWrite, error: &error) == false {
-                println("error")
+            let filePath = NSTemporaryDirectory().appending("image.igo")
+            do {
+                let url = URL(fileURLWithPath: filePath)
+                try imageData?.write(to: url, options: .atomicWrite)
+            }
+            catch _ {
                 return
             }
             
-            if let fileURL = NSURL(fileURLWithPath: filePath) {
-                documentController = UIDocumentInteractionController(URL: fileURL)
-                if let controller = documentController {
-                    controller.delegate = self
-                    controller.UTI = "com.instagram.exclusivegram"
-                    controller.presentOpenInMenuFromRect(view.bounds, inView: view, animated: true)
-                }
+            let fileURL = URL(fileURLWithPath: filePath)
+            documentController = UIDocumentInteractionController(url: fileURL)
+            if let controller = documentController {
+                controller.delegate = self
+                controller.uti = "com.instagram.photo"
+                controller.presentOpenInMenu(from: view.bounds, in: view, animated: true)
             }
         }
         else {
-            let alertController = UIAlertController(title: "Needs Install \"Instagram\" to Share", message: nil, preferredStyle: .Alert)
-            alertController.addAction(UIAlertAction(title: "AppStore", style: .Default, handler: { (action) -> Void in
-                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(2 * Double(NSEC_PER_SEC))), dispatch_get_main_queue()) {
+            let alertController = UIAlertController(title: "Needs Install \"Instagram\" to Share", message: nil, preferredStyle: .alert)
+            alertController.addAction(UIAlertAction(title: "AppStore", style: .default, handler: { (action) -> Void in
+                DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 2) {
                     if let label = self.instagramLabel {
-                        UIView.animateWithDuration(0.2, animations: { () -> Void in
+                        UIView.animate(withDuration: 0.2, animations: { () -> Void in
                             label.alpha = 0
                             }, completion: { (finishec) -> Void in
                                 label.removeFromSuperview()
@@ -309,13 +335,13 @@ class ViewController: UIViewController, HomeSceneDelegate, UIDocumentInteraction
                     }
                 }
                 
-                if let url = NSURL(string: "https://itunes.apple.com/app/instagram/id389801252") where UIApplication.sharedApplication().canOpenURL(url) == true {
-                    UIApplication.sharedApplication().openURL(url)
+                if let url = URL(string: "https://itunes.apple.com/app/instagram/id389801252") , UIApplication.shared.canOpenURL(url) == true {
+                    UIApplication.shared.openURL(url)
                 }
             }))
-            alertController.addAction(UIAlertAction(title: "Cancel", style: .Cancel, handler: { (action) -> Void in
+            alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { (action) -> Void in
                 if let label = self.instagramLabel {
-                    UIView.animateWithDuration(0.2, animations: { () -> Void in
+                    UIView.animate(withDuration: 0.2, animations: { () -> Void in
                         label.alpha = 0
                         }, completion: { (finishec) -> Void in
                             label.removeFromSuperview()
@@ -327,15 +353,15 @@ class ViewController: UIViewController, HomeSceneDelegate, UIDocumentInteraction
                 }
             }))
             alertController.popoverPresentationController?.sourceView = view
-            presentViewController(alertController, animated: true, completion: nil)
+            present(alertController, animated: true, completion: nil)
         }
     }
     
-    func documentInteractionController(controller: UIDocumentInteractionController, willBeginSendingToApplication application: String) {
+    func documentInteractionController(_ controller: UIDocumentInteractionController, willBeginSendingToApplication application: String?) {
         isDocumentControllerSelected = true
     }
     
-    func documentInteractionControllerDidDismissOpenInMenu(controller: UIDocumentInteractionController) {
+    func documentInteractionControllerDidDismissOpenInMenu(_ controller: UIDocumentInteractionController) {
         let delay: Double
         if isDocumentControllerSelected == true {
             delay = 3
@@ -349,9 +375,9 @@ class ViewController: UIViewController, HomeSceneDelegate, UIDocumentInteraction
             Analytics.sendEvent(category: "instagram", action: "cancel")
         }
         
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(delay * Double(NSEC_PER_SEC))), dispatch_get_main_queue()) {
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + delay) {
             if let label = self.instagramLabel {
-                UIView.animateWithDuration(0.2, animations: { () -> Void in
+                UIView.animate(withDuration: 0.2, animations: { () -> Void in
                     label.alpha = 0
                 }, completion: { (finishec) -> Void in
                     label.removeFromSuperview()
@@ -361,49 +387,9 @@ class ViewController: UIViewController, HomeSceneDelegate, UIDocumentInteraction
             if let scene = self.homeSceneView?.scene as? HomeScene {
                 scene.reset()
             }
-            
-            if delay != 0 {
-                self.doYouLikePicshot()
-            }
         }
     }
     
-    func doYouLikePicshot() {
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(1.5 * Double(NSEC_PER_SEC))), dispatch_get_main_queue()) {
-            let alertController = UIAlertController(title: "Do you like picshot?", message: nil, preferredStyle: .Alert)
-            alertController.addAction(UIAlertAction(title: "Tell a Friend", style: .Default, handler: { (action) -> Void in
-                if let url = NSURL(string: "https://itunes.apple.com/app/id\(AppId)") {
-                    let viewController = UIActivityViewController(activityItems: [url, "I Like #picshot"], applicationActivities: nil)
-                    viewController.popoverPresentationController?.sourceView = self.view
-                    self.presentViewController(viewController, animated: true, completion: nil)
-                }
-            }))
-            alertController.addAction(UIAlertAction(title: "Review on AppStore", style: .Default, handler: { (action) -> Void in
-                if let url = ViewController.appStoreUrl(AppId) where UIApplication.sharedApplication().canOpenURL(url) {
-                    UIApplication.sharedApplication().openURL(url)
-                }
-            }))
-            alertController.addAction(UIAlertAction(title: "No, thanks", style: .Cancel, handler: nil))
-            alertController.popoverPresentationController?.sourceView = self.view
-            self.presentViewController(alertController, animated: true, completion: nil)
-        }
-    }
-    
-    // MARK: App Store URL
-    class func appStoreUrl(appId: String) -> NSURL? {
-        var url: NSURL?
-        let systemVersion = (UIDevice.currentDevice().systemVersion as NSString).doubleValue
-        if systemVersion >= 7.1 {
-            url = NSURL(string: "itms-apps://itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?type=Purple+Software&id=" + appId)
-        }
-        else if systemVersion >= 7.0 {
-            url = NSURL(string: "itms-apps://itunes.apple.com/app/id" + appId)
-        }
-        else {
-            url = NSURL(string: "itms-apps://ax.itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?type=Purple+Software&id=" + appId)
-        }
-        return url
-    }
 }
 
 
